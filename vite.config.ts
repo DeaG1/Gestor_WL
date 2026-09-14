@@ -12,7 +12,7 @@ export default defineConfig({
   },
   test: {
     globals: true,
-    environment: 'jsdom',
+    environment: 'node',
     setupFiles: ['./src/test-setup.ts'],
     include: ['src/**/*.test.{ts,tsx}', 'supabase/functions/**/*.test.ts'],
     env: { TZ: 'UTC' },
