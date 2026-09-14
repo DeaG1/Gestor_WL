@@ -58,11 +58,14 @@ export const getSettings = async (): Promise<Settings> => {
 };
 
 export const saveSettings = async (patch: Partial<Settings>): Promise<void> => {
-  const { data: session } = await supabase.auth.getUser();
+  const { data } = await supabase.auth.getUser();
+  const userId = data.user?.id;
+  if (!userId) throw new Error('Sua sessão expirou. Entre de novo para salvar.');
+
   const { error } = await supabase
     .from('user_settings')
     .update(settingsToRow(patch))
-    .eq('user_id', session.user?.id ?? '');
+    .eq('user_id', userId);
   if (error) throw new Error(`Não consegui salvar as configurações: ${error.message}`);
 };
 
