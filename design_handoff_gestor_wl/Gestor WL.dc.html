@@ -1,0 +1,798 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="_ds/nocturne-1745dc6e-396f-4247-8db3-32458f48c3e3/styles.css">
+<script src="_ds/nocturne-1745dc6e-396f-4247-8db3-32458f48c3e3/_ds_bundle.js"></script>
+<style>
+html, body { margin: 0; min-height: 100%; background: var(--color-bg); color: var(--color-text); font-family: var(--font-body); }
+a { color: var(--color-accent); } a:hover { color: var(--color-accent-400); }
+input[type=date]::-webkit-calendar-picker-indicator, input[type=time]::-webkit-calendar-picker-indicator { filter: invert(0.8); }
+@keyframes wl-rise { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: none; } }
+@keyframes wl-grow { from { transform: scaleY(0); } to { transform: scaleY(1); } }
+</style>
+</helmet>
+
+<div style="min-height:100vh;display:grid;grid-template-columns:232px minmax(0,1fr);background:radial-gradient(900px 420px at 30% -10%, var(--color-accent-900) 0%, transparent 65%), var(--color-bg)">
+
+  <!-- SIDEBAR -->
+  <aside style="position:sticky;top:0;height:100vh;display:flex;flex-direction:column;gap:var(--space-8);padding:var(--space-8) var(--space-6);border-right:1px solid var(--color-divider);box-sizing:border-box">
+    <div>
+      <div style="font-family:var(--font-heading);font-weight:500;font-size:20px;letter-spacing:-.01em">Gestor WL</div>
+      <div style="font-size:12px;color:var(--color-neutral-500);margin-top:2px">FCFS · GTD · Blowfly & MEGA</div>
+    </div>
+    <nav style="display:flex;flex-direction:column;gap:2px">
+      <sc-for list="{{ tabs }}" as="t" hint-placeholder-count="5">
+        <button onClick="{{ t.go }}" style="display:flex;align-items:center;gap:10px;text-align:left;width:100%;background:{{ t.bg }};border:0;cursor:pointer;font:inherit;font-size:14px;font-weight:500;padding:9px 12px;border-radius:var(--radius-md);color:{{ t.color }};box-shadow:{{ t.ring }}" style-hover="background:color-mix(in srgb, var(--color-text) 6%, transparent)">
+          <span>{{ t.label }}</span>
+          <span style="margin-left:auto;font-size:11px;color:var(--color-neutral-500)">{{ t.badge }}</span>
+        </button>
+      </sc-for>
+    </nav>
+    <button class="btn btn-primary btn-block" style="margin-top:0" onClick="{{ openNew }}">+ Nova WL</button>
+    <div style="margin-top:auto;display:flex;flex-direction:column;gap:var(--space-2)">
+      <sc-for list="{{ walletCards }}" as="w" hint-placeholder-count="2">
+        <div style="display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:var(--radius-md);background:var(--color-surface);box-shadow:var(--shadow-sm)">
+          <span style="width:8px;height:8px;border-radius:50%;background:{{ w.dot }};flex:none"></span>
+          <div style="flex:1;min-width:0"><div style="font-size:13px;font-weight:500">{{ w.name }}</div><div style="font-size:11px;color:var(--color-neutral-500)">{{ w.sub }}</div></div>
+          <div style="font-size:18px;font-weight:500">{{ w.count }}</div>
+        </div>
+      </sc-for>
+      <div style="font-size:11px;color:var(--color-neutral-600);padding:4px 2px">{{ nowLabel }}</div>
+    </div>
+  </aside>
+
+  <main style="min-width:0;padding:var(--space-8) 40px 96px;box-sizing:border-box">
+    <div style="max-width:1080px;margin:0 auto;animation:wl-rise .35s ease-out">
+
+    <!-- DASHBOARD -->
+    <sc-if value="{{ isDash }}" hint-placeholder-val="{{ true }}">
+      <div style="display:flex;flex-direction:column;gap:var(--space-8)">
+        <header style="display:flex;align-items:flex-end;gap:var(--space-6);flex-wrap:wrap">
+          <div style="flex:1;min-width:240px">
+            <div style="font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--color-accent)">Dashboard</div>
+            <h1 style="font-size:34px;margin:4px 0 0">Visão geral</h1>
+            <p style="margin:6px 0 0;font-size:14px;color:var(--color-neutral-400)">{{ dashSummary }}</p>
+          </div>
+          <div class="seg">
+            <sc-for list="{{ dashScopeOpts }}" as="o" hint-placeholder-count="3">
+              <label class="seg-opt"><input type="radio" checked="{{ o.checked }}" onChange="{{ o.pick }}"><span>{{ o.label }}</span></label>
+            </sc-for>
+          </div>
+        </header>
+
+        <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:var(--space-3)">
+          <sc-for list="{{ kpis }}" as="k" hint-placeholder-count="5">
+            <div class="card elev-sm" style="padding:var(--space-4);gap:6px">
+              <div class="card-kicker" style="color:var(--color-neutral-500)">{{ k.label }}</div>
+              <div style="font-size:30px;font-weight:500;letter-spacing:-.02em;line-height:1;color:{{ k.color }}">{{ k.value }}</div>
+              <div style="font-size:12px;color:var(--color-neutral-500)">{{ k.sub }}</div>
+            </div>
+          </sc-for>
+        </div>
+
+        <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,440px),1fr));gap:var(--space-3)">
+          <!-- Chart: WL por wallet, stacked por tipo -->
+          <div class="card elev-sm" style="padding:var(--space-6);gap:var(--space-4)">
+            <div><div class="card-title" style="font-size:15px">WL por wallet</div><div style="font-size:12px;color:var(--color-neutral-500)">Quantas vagas você tem e de que tipo</div></div>
+            <div style="display:flex;flex-direction:column;gap:var(--space-4)">
+              <sc-for list="{{ walletBars }}" as="w" hint-placeholder-count="2">
+                <div>
+                  <div style="display:flex;justify-content:space-between;font-size:13px;margin-bottom:6px"><span style="font-weight:500">{{ w.name }}</span><span style="color:var(--color-neutral-400)">{{ w.count }} WL · {{ w.minted }} mintadas</span></div>
+                  <div style="display:flex;height:22px;border-radius:6px;overflow:hidden;background:var(--color-neutral-900);gap:2px">
+                    <sc-for list="{{ w.segs }}" as="s" hint-placeholder-count="3">
+                      <div title="{{ s.title }}" style="width:{{ s.w }};background:{{ s.color }};transition:width .4s ease"></div>
+                    </sc-for>
+                  </div>
+                </div>
+              </sc-for>
+            </div>
+            <div style="display:flex;gap:var(--space-4);font-size:12px;color:var(--color-neutral-400);flex-wrap:wrap">
+              <sc-for list="{{ typeLegend }}" as="l" hint-placeholder-count="4"><span style="display:inline-flex;align-items:center;gap:6px"><span style="width:10px;height:10px;border-radius:3px;background:{{ l.color }}"></span>{{ l.label }} · {{ l.count }}</span></sc-for>
+            </div>
+          </div>
+
+          <!-- Chart: donut FCFS x GTD -->
+          <div class="card elev-sm" style="padding:var(--space-6);gap:var(--space-4);flex-direction:row;align-items:center">
+            <div style="width:150px;height:150px;flex:none;border-radius:50%;background:{{ donutBg }};display:grid;place-items:center">
+              <div style="width:104px;height:104px;border-radius:50%;background:var(--color-surface);display:grid;place-items:center;text-align:center">
+                <div><div style="font-size:26px;font-weight:500;line-height:1">{{ donutCenter }}</div><div style="font-size:10px;letter-spacing:.08em;text-transform:uppercase;color:var(--color-neutral-500);margin-top:3px">{{ donutCenterSub }}</div></div>
+              </div>
+            </div>
+            <div style="flex:1;display:flex;flex-direction:column;gap:var(--space-3)">
+              <div><div class="card-title" style="font-size:15px">FCFS vs GTD</div><div style="font-size:12px;color:var(--color-neutral-500)">GTD é vaga garantida; FCFS depende de velocidade</div></div>
+              <div style="display:flex;flex-direction:column;gap:6px">
+                <sc-for list="{{ typeLegend }}" as="l" hint-placeholder-count="4">
+                  <div style="display:flex;align-items:center;gap:8px;font-size:13px"><span style="width:10px;height:10px;border-radius:3px;background:{{ l.color }}"></span><span style="flex:1">{{ l.label }}</span><span style="font-weight:500">{{ l.count }}</span><span style="color:var(--color-neutral-500);width:38px;text-align:right">{{ l.pct }}</span></div>
+                </sc-for>
+              </div>
+            </div>
+          </div>
+
+          <!-- Chart: mints por dia -->
+          <div class="card elev-sm" style="padding:var(--space-6);gap:var(--space-4)">
+            <div><div class="card-title" style="font-size:15px">Agenda de mints</div><div style="font-size:12px;color:var(--color-neutral-500)">Mints com data marcada, por dia</div></div>
+            <sc-if value="{{ hasAgenda }}" hint-placeholder-val="{{ true }}">
+              <div style="display:flex;align-items:flex-end;gap:8px;height:130px;padding-top:8px">
+                <sc-for list="{{ agendaBars }}" as="b" hint-placeholder-count="6">
+                  <div style="flex:1;display:flex;flex-direction:column;align-items:center;gap:6px;height:100%;justify-content:flex-end">
+                    <div style="font-size:12px;font-weight:500;color:{{ b.numColor }}">{{ b.count }}</div>
+                    <div title="{{ b.title }}" style="width:100%;max-width:44px;height:{{ b.h }};border-radius:6px 6px 3px 3px;background:{{ b.color }};transform-origin:bottom;animation:wl-grow .5s ease-out"></div>
+                    <div style="font-size:11px;color:{{ b.labelColor }};white-space:nowrap">{{ b.label }}</div>
+                  </div>
+                </sc-for>
+              </div>
+            </sc-if>
+            <sc-if value="{{ noAgenda }}" hint-placeholder-val="{{ false }}"><div style="font-size:13px;color:var(--color-neutral-500)">Nenhum mint com data ainda.</div></sc-if>
+          </div>
+
+          <!-- Chart: lucro acumulado -->
+          <div class="card elev-sm" style="padding:var(--space-6);gap:var(--space-4)">
+            <div style="display:flex;align-items:flex-start;gap:var(--space-3)">
+              <div style="flex:1"><div class="card-title" style="font-size:15px">Lucro acumulado</div><div style="font-size:12px;color:var(--color-neutral-500)">Venda − custo, mint a mint, em ordem de data</div></div>
+              <div style="font-size:22px;font-weight:500;color:{{ profitColor }}">{{ profitTotal }}</div>
+            </div>
+            <sc-if value="{{ hasProfitLine }}" hint-placeholder-val="{{ true }}">
+              <svg viewBox="0 0 600 150" preserveAspectRatio="none" style="width:100%;height:130px;display:block;overflow:visible">
+                <line x1="0" y1="{{ zeroY }}" x2="600" y2="{{ zeroY }}" stroke="var(--color-neutral-700)" stroke-dasharray="3 5"></line>
+                <polygon points="{{ areaPts }}" fill="var(--color-accent)" opacity="0.14"></polygon>
+                <polyline points="{{ linePts }}" fill="none" stroke="var(--color-accent)" stroke-width="2" stroke-linejoin="round" vector-effect="non-scaling-stroke"></polyline>
+                <sc-for list="{{ lineDots }}" as="p" hint-placeholder-count="0"><circle cx="{{ p.x }}" cy="{{ p.y }}" r="4" fill="var(--color-bg)" stroke="var(--color-accent)" stroke-width="2" vector-effect="non-scaling-stroke"></circle></sc-for>
+              </svg>
+              <div style="display:flex;justify-content:space-between;font-size:11px;color:var(--color-neutral-500)"><span>{{ lineFirst }}</span><span>{{ lineLast }}</span></div>
+            </sc-if>
+            <sc-if value="{{ noProfitLine }}" hint-placeholder-val="{{ false }}">
+              <div style="height:130px;display:grid;place-items:center;border:1px dashed var(--color-divider);border-radius:var(--radius-md);text-align:center;padding:var(--space-4)">
+                <div style="font-size:13px;color:var(--color-neutral-500);max-width:300px">Ao marcar um mint como <span style="color:var(--color-accent-300)">Mintado</span>, registre quanto custou e por quanto vendeu. O gráfico monta sozinho.</div>
+              </div>
+            </sc-if>
+          </div>
+        </div>
+
+        <!-- Resultado por wallet -->
+        <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,440px),1fr));gap:var(--space-3)">
+          <sc-for list="{{ walletPnl }}" as="w" hint-placeholder-count="2">
+            <div class="card elev-sm" style="padding:var(--space-6);gap:var(--space-4)">
+              <div style="display:flex;align-items:center;gap:10px"><span style="width:8px;height:8px;border-radius:50%;background:{{ w.dot }}"></span><div class="card-title" style="font-size:15px">Resultado {{ w.name }}</div><span style="margin-left:auto;font-size:12px;color:var(--color-neutral-500)">{{ w.minted }} mints registrados</span></div>
+              <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:var(--space-3)">
+                <div><div style="font-size:11px;color:var(--color-neutral-500)">Gasto</div><div style="font-size:20px;font-weight:500">{{ w.cost }}</div></div>
+                <div><div style="font-size:11px;color:var(--color-neutral-500)">Vendido</div><div style="font-size:20px;font-weight:500">{{ w.sold }}</div></div>
+                <div><div style="font-size:11px;color:var(--color-neutral-500)">Lucro</div><div style="font-size:20px;font-weight:500;color:{{ w.profitColor }}">{{ w.profit }}</div></div>
+              </div>
+              <div style="display:flex;height:8px;border-radius:4px;overflow:hidden;background:var(--color-neutral-900)"><div style="width:{{ w.roiW }};background:{{ w.dot }};transition:width .4s"></div></div>
+              <div style="font-size:12px;color:var(--color-neutral-400)">{{ w.roiLabel }}</div>
+            </div>
+          </sc-for>
+        </div>
+
+        <!-- Tabela P&L -->
+        <section>
+          <div style="display:flex;align-items:baseline;gap:var(--space-3);margin-bottom:var(--space-3)"><h6 style="color:var(--color-neutral-500);margin:0">Mints registrados</h6><span style="font-size:12px;color:var(--color-neutral-600)">{{ pnlCount }}</span></div>
+          <sc-if value="{{ hasPnl }}" hint-placeholder-val="{{ false }}">
+            <table class="table">
+              <thead><tr><th>Nome</th><th>Wallet</th><th>Data</th><th>Qtd</th><th style="text-align:right">Custo</th><th style="text-align:right">Venda</th><th style="text-align:right">Lucro</th><th></th></tr></thead>
+              <tbody>
+                <sc-for list="{{ pnlRows }}" as="it" hint-placeholder-count="3">
+                  <tr>
+                    <td style="font-weight:500">{{ it.name }}</td>
+                    <td><span class="tag" style="background:{{ it.walletBg }};color:{{ it.walletFg }}">{{ it.wallet }}</span></td>
+                    <td style="color:var(--color-neutral-400)">{{ it.dateShort }}</td>
+                    <td style="color:var(--color-neutral-400)">{{ it.supplyLabel }}</td>
+                    <td style="text-align:right">{{ it.costLabel }}</td>
+                    <td style="text-align:right">{{ it.soldLabel }}</td>
+                    <td style="text-align:right;font-weight:500;color:{{ it.profitColor }}">{{ it.profitLabel }}</td>
+                    <td style="text-align:right"><button class="btn btn-ghost btn-icon" style="width:28px;height:28px" title="Editar" onClick="{{ it.edit }}">✎</button></td>
+                  </tr>
+                </sc-for>
+              </tbody>
+            </table>
+          </sc-if>
+          <sc-if value="{{ noPnl }}" hint-placeholder-val="{{ true }}"><div style="font-size:13px;color:var(--color-neutral-500)">Nenhum mint marcado como mintado ainda.</div></sc-if>
+        </section>
+      </div>
+    </sc-if>
+
+    <!-- HOJE -->
+    <sc-if value="{{ isHoje }}" hint-placeholder-val="{{ false }}">
+      <div style="display:flex;flex-direction:column;gap:var(--space-8)">
+        <header style="display:flex;align-items:flex-end;gap:var(--space-8);flex-wrap:wrap">
+          <div style="flex:1;min-width:240px">
+            <div style="font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--color-accent)">Hoje · horários em BRT</div>
+            <h1 style="font-size:34px;margin:4px 0 0">{{ todayLong }}</h1>
+          </div>
+          <div style="display:flex;gap:var(--space-3)">
+            <sc-for list="{{ todayStats }}" as="s" hint-placeholder-count="3">
+              <div style="padding:8px 14px;border-radius:var(--radius-md);background:var(--color-surface);box-shadow:var(--shadow-sm);min-width:90px"><div style="font-size:22px;font-weight:500;line-height:1">{{ s.value }}</div><div style="font-size:11px;color:var(--color-neutral-500);margin-top:3px">{{ s.label }}</div></div>
+            </sc-for>
+          </div>
+        </header>
+
+        <section>
+          <h6 style="color:var(--color-neutral-500);margin-bottom:var(--space-3)">Mints de hoje</h6>
+          <sc-if value="{{ hasToday }}" hint-placeholder-val="{{ false }}">
+            <div style="display:flex;flex-direction:column;gap:var(--space-3)">
+              <sc-for list="{{ todayItems }}" as="it" hint-placeholder-count="2">
+                <div class="card elev-sm" style="flex-direction:row;align-items:center;gap:var(--space-6);padding:var(--space-4) var(--space-6);opacity:{{ it.opacity }};box-shadow:{{ it.ring }}">
+                  <div style="width:84px;flex:none">
+                    <div style="font-size:30px;font-weight:500;letter-spacing:-.02em;line-height:1;color:var(--color-accent-300)">{{ it.timeLabel }}</div>
+                    <div style="font-size:10px;letter-spacing:.08em;text-transform:uppercase;color:var(--color-neutral-500);margin-top:4px">{{ it.timeSub }}</div>
+                  </div>
+                  <div style="flex:1;min-width:0">
+                    <div style="font-size:18px;font-weight:500;text-decoration:{{ it.deco }}">{{ it.name }}</div>
+                    <div style="display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin-top:6px;font-size:12px;color:var(--color-neutral-400)">
+                      <span class="tag" style="background:{{ it.walletBg }};color:{{ it.walletFg }}">{{ it.wallet }}</span><span class="tag tag-outline">{{ it.type }}</span><span>{{ it.chainLabel }}</span><span>{{ it.costLabel }}</span><span>{{ it.note }}</span>
+                    </div>
+                  </div>
+                  <div style="display:flex;gap:var(--space-2);flex:none">
+                    <sc-if value="{{ it.hasLink }}" hint-placeholder-val="{{ false }}"><a class="btn btn-ghost" href="{{ it.link }}" target="_blank" rel="noopener">Abrir mint ↗</a></sc-if>
+                    <button class="btn btn-primary" onClick="{{ it.mint }}">{{ it.mintLabel }}</button>
+                    <button class="btn btn-secondary" onClick="{{ it.skip }}">{{ it.skipLabel }}</button>
+                    <button class="btn btn-secondary btn-icon" title="Editar" onClick="{{ it.edit }}">✎</button>
+                  </div>
+                </div>
+              </sc-for>
+            </div>
+          </sc-if>
+          <sc-if value="{{ noToday }}" hint-placeholder-val="{{ false }}">
+            <div class="card elev-sm" style="padding:var(--space-6);flex-direction:row;align-items:center;gap:var(--space-6)">
+              <div style="font-size:30px;font-weight:500;color:var(--color-neutral-600);letter-spacing:-.02em">—</div>
+              <div><div style="font-size:16px;font-weight:500">Nada pra mintar hoje</div><div style="font-size:13px;color:var(--color-neutral-400);margin-top:2px">Próximo: <span style="color:var(--color-text)">{{ nextLabel }}</span></div></div>
+            </div>
+          </sc-if>
+        </section>
+
+        <sc-if value="{{ hasPast }}" hint-placeholder-val="{{ false }}">
+          <section>
+            <h6 style="color:var(--color-neutral-500);margin-bottom:var(--space-3)">Passaram sem marcar · {{ pastCount }}</h6>
+            <div class="card elev-sm" style="padding:0;gap:0;overflow:hidden">
+              <sc-for list="{{ pastItems }}" as="it" hint-placeholder-count="1">
+                <div style="display:flex;align-items:center;gap:var(--space-6);padding:var(--space-3) var(--space-6);border-bottom:1px solid var(--color-divider)" style-hover="background:color-mix(in srgb, var(--color-text) 4%, transparent)">
+                  <div style="width:84px;flex:none;font-size:13px;color:var(--color-neutral-400)">{{ it.dateShort }}</div>
+                  <div style="flex:1;min-width:0"><span style="font-size:15px;font-weight:500">{{ it.name }}</span><span style="font-size:12px;color:var(--color-neutral-500);margin-left:10px">{{ it.wallet }} · {{ it.type }} {{ it.chainLabel }}</span></div>
+                  <button class="btn btn-ghost" onClick="{{ it.mint }}">Mintei</button>
+                  <button class="btn btn-ghost" style="color:var(--color-neutral-400)" onClick="{{ it.skip }}">Pulei</button>
+                </div>
+              </sc-for>
+            </div>
+          </section>
+        </sc-if>
+
+        <section>
+          <h6 style="color:var(--color-neutral-500);margin-bottom:var(--space-3)">Próximos</h6>
+          <sc-if value="{{ hasUpcoming }}" hint-placeholder-val="{{ true }}">
+            <div style="display:flex;flex-direction:column">
+              <sc-for list="{{ upcoming }}" as="g" hint-placeholder-count="3">
+                <div style="display:grid;grid-template-columns:132px 20px minmax(0,1fr);gap:0 var(--space-4);padding-bottom:var(--space-6)">
+                  <div style="padding-top:8px;text-align:right">
+                    <div style="font-size:15px;font-weight:500">{{ g.weekday }}</div>
+                    <div style="font-size:12px;color:var(--color-neutral-500)">{{ g.dateShort }} · {{ g.rel }}</div>
+                  </div>
+                  <div style="position:relative;display:flex;justify-content:center"><div style="position:absolute;top:0;bottom:calc(var(--space-6) * -1);width:1px;background:var(--color-divider)"></div><div style="position:relative;width:9px;height:9px;border-radius:50%;background:var(--color-bg);border:2px solid var(--color-accent);margin-top:12px"></div></div>
+                  <div style="display:flex;flex-direction:column;gap:var(--space-2)">
+                    <sc-for list="{{ g.items }}" as="it" hint-placeholder-count="1">
+                      <div class="card" style="flex-direction:row;align-items:center;gap:var(--space-4);padding:var(--space-3) var(--space-4);opacity:{{ it.opacity }}" style-hover="box-shadow:var(--shadow-sm)">
+                        <div style="width:56px;flex:none;font-size:16px;font-weight:500;color:var(--color-accent-300)">{{ it.timeLabel }}</div>
+                        <div style="flex:1;min-width:0;font-size:15px;font-weight:500">{{ it.name }}</div>
+                        <div style="display:flex;gap:8px;align-items:center;font-size:12px;color:var(--color-neutral-400)"><span class="tag" style="background:{{ it.walletBg }};color:{{ it.walletFg }}">{{ it.wallet }}</span><span>{{ it.type }}</span><span>{{ it.chainLabel }}</span><span>{{ it.note }}</span></div>
+                        <button class="btn btn-ghost btn-icon" style="width:28px;height:28px" title="Editar" onClick="{{ it.edit }}">✎</button>
+                      </div>
+                    </sc-for>
+                  </div>
+                </div>
+              </sc-for>
+            </div>
+          </sc-if>
+          <sc-if value="{{ noUpcoming }}" hint-placeholder-val="{{ false }}"><div style="font-size:14px;color:var(--color-neutral-500)">Nenhum mint com data marcada.</div></sc-if>
+        </section>
+
+        <section>
+          <h6 style="color:var(--color-neutral-500);margin-bottom:var(--space-3)">Sem data · {{ undatedCount }}</h6>
+          <div style="display:flex;flex-wrap:wrap;gap:6px">
+            <sc-for list="{{ undated }}" as="it" hint-placeholder-count="6">
+              <button onClick="{{ it.edit }}" title="Definir data" style="display:inline-flex;align-items:center;gap:8px;background:var(--color-surface);border:1px solid transparent;color:var(--color-text);font:inherit;font-size:13px;padding:6px 12px;border-radius:var(--radius-md);cursor:pointer" style-hover="border-color:var(--color-accent)">
+                <span style="width:6px;height:6px;border-radius:50%;background:{{ it.dot }}"></span>{{ it.name }}<span style="color:var(--color-neutral-500);font-size:11px">{{ it.status }}</span>
+              </button>
+            </sc-for>
+          </div>
+        </section>
+      </div>
+    </sc-if>
+
+    <!-- LISTA -->
+    <sc-if value="{{ isLista }}" hint-placeholder-val="{{ false }}">
+      <div style="display:flex;flex-direction:column;gap:var(--space-6)">
+        <header>
+          <div style="font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--color-accent)">Lista</div>
+          <h1 style="font-size:34px;margin:4px 0 0">Todas as WL</h1>
+          <p style="margin:6px 0 0;font-size:14px;color:var(--color-neutral-400)">{{ listSummary }}</p>
+        </header>
+        <div style="display:flex;flex-wrap:wrap;gap:var(--space-3);align-items:center">
+          <input class="input" style="width:220px" placeholder="Buscar nome…" value="{{ filters.q }}" onChange="{{ onSearch }}">
+          <sc-for list="{{ filterGroups }}" as="fg" hint-placeholder-count="4">
+            <div class="seg">
+              <sc-for list="{{ fg.opts }}" as="o" hint-placeholder-count="3">
+                <label class="seg-opt" style="white-space:nowrap"><input type="radio" checked="{{ o.checked }}" onChange="{{ o.pick }}"><span>{{ o.label }}</span></label>
+              </sc-for>
+            </div>
+          </sc-for>
+        </div>
+        <div class="card elev-sm" style="padding:var(--space-2) var(--space-4)">
+          <table class="table">
+            <thead><tr><th>Nome</th><th>Wallet</th><th>Tipo</th><th>Chain</th><th>Data · BRT</th><th>Status</th><th style="text-align:right">Custo</th><th style="text-align:right">Venda</th><th style="text-align:right">Lucro</th><th></th></tr></thead>
+            <tbody>
+              <sc-for list="{{ listRows }}" as="it" hint-placeholder-count="8">
+                <tr style="opacity:{{ it.opacity }}">
+                  <td><div style="font-weight:500;text-decoration:{{ it.deco }}">{{ it.name }}</div><div style="font-size:11px;color:var(--color-neutral-500)">{{ it.note }}</div></td>
+                  <td><span class="tag" style="background:{{ it.walletBg }};color:{{ it.walletFg }}">{{ it.wallet }}</span></td>
+                  <td style="color:var(--color-accent-300);font-size:13px">{{ it.type }}</td>
+                  <td style="font-size:13px">{{ it.chainLabel }}</td>
+                  <td style="white-space:nowrap">{{ it.dateTime }}</td>
+                  <td><span class="tag" style="background:{{ it.statusBg }};color:{{ it.statusFg }}">{{ it.statusLabel }}</span></td>
+                  <td style="text-align:right;font-size:13px">{{ it.costLabel }}</td>
+                  <td style="text-align:right;font-size:13px">{{ it.soldLabel }}</td>
+                  <td style="text-align:right;font-size:13px;font-weight:500;color:{{ it.profitColor }}">{{ it.profitLabel }}</td>
+                  <td style="text-align:right;white-space:nowrap">
+                    <div style="display:inline-flex;gap:2px">
+                      <sc-if value="{{ it.hasLink }}" hint-placeholder-val="{{ false }}"><a class="btn btn-ghost btn-icon" style="width:28px;height:28px" href="{{ it.link }}" target="_blank" rel="noopener" title="Abrir link">↗</a></sc-if>
+                      <button class="btn btn-ghost btn-icon" style="width:28px;height:28px" title="{{ it.mintLabel }}" onClick="{{ it.mint }}">✓</button>
+                      <button class="btn btn-ghost btn-icon" style="width:28px;height:28px;color:var(--color-neutral-400)" title="{{ it.skipLabel }}" onClick="{{ it.skip }}">→</button>
+                      <button class="btn btn-ghost btn-icon" style="width:28px;height:28px" title="Editar" onClick="{{ it.edit }}">✎</button>
+                    </div>
+                  </td>
+                </tr>
+              </sc-for>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </sc-if>
+
+    <!-- CALENDÁRIO -->
+    <sc-if value="{{ isCal }}" hint-placeholder-val="{{ false }}">
+      <div style="display:flex;flex-direction:column;gap:var(--space-6)">
+        <header style="display:flex;align-items:flex-end;gap:var(--space-4)">
+          <div><div style="font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--color-accent)">Calendário</div><h1 style="font-size:34px;margin:4px 0 0;text-transform:capitalize">{{ calTitle }}</h1></div>
+          <div style="display:flex;gap:var(--space-1);margin-left:auto">
+            <button class="btn btn-secondary btn-icon" onClick="{{ calPrev }}">‹</button>
+            <button class="btn btn-secondary" onClick="{{ calToday }}">Hoje</button>
+            <button class="btn btn-secondary btn-icon" onClick="{{ calNext }}">›</button>
+          </div>
+        </header>
+        <div>
+          <div style="display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:6px;margin-bottom:6px">
+            <sc-for list="{{ weekdays }}" as="w" hint-placeholder-count="7"><div style="font-size:10px;letter-spacing:.08em;text-transform:uppercase;color:var(--color-neutral-500);padding:0 8px">{{ w }}</div></sc-for>
+          </div>
+          <div style="display:flex;flex-direction:column;gap:6px">
+            <sc-for list="{{ weeks }}" as="wk" hint-placeholder-count="5">
+              <div style="display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:6px">
+                <sc-for list="{{ wk.days }}" as="d" hint-placeholder-count="7">
+                  <div style="min-height:110px;padding:8px;border-radius:var(--radius-md);background:var(--color-surface);opacity:{{ d.opacity }};box-shadow:{{ d.ring }}">
+                    <div style="font-size:12px;font-weight:500;color:{{ d.numColor }};margin-bottom:6px">{{ d.num }}</div>
+                    <div style="display:flex;flex-direction:column;gap:3px">
+                      <sc-for list="{{ d.items }}" as="it" hint-placeholder-count="0">
+                        <button onClick="{{ it.edit }}" style="display:flex;align-items:center;gap:5px;width:100%;text-align:left;background:{{ it.calBg }};border:0;padding:3px 6px;border-radius:var(--radius-sm);font:inherit;font-size:11px;line-height:1.3;color:var(--color-text);cursor:pointer;opacity:{{ it.opacity }}" style-hover="filter:brightness(1.2)">
+                          <span style="color:var(--color-neutral-400);flex:none">{{ it.timeShort }}</span>
+                          <span style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-weight:500">{{ it.name }}</span>
+                        </button>
+                      </sc-for>
+                    </div>
+                  </div>
+                </sc-for>
+              </div>
+            </sc-for>
+          </div>
+        </div>
+        <div style="display:flex;gap:var(--space-6);font-size:12px;color:var(--color-neutral-400)">
+          <span style="display:inline-flex;align-items:center;gap:6px"><span style="width:10px;height:10px;border-radius:3px;background:oklch(0.42 0.09 85)"></span>Blowfly</span>
+          <span style="display:inline-flex;align-items:center;gap:6px"><span style="width:10px;height:10px;border-radius:3px;background:oklch(0.42 0.1 250)"></span>MEGA</span>
+        </div>
+      </div>
+    </sc-if>
+
+    <!-- NOTIFICAÇÕES -->
+    <sc-if value="{{ isNotif }}" hint-placeholder-val="{{ false }}">
+      <div style="display:flex;flex-direction:column;gap:var(--space-8)">
+        <header>
+          <div style="font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--color-accent)">Notificações</div>
+          <h1 style="font-size:34px;margin:4px 0 0">Lembrete diário</h1>
+          <p style="margin:6px 0 0;font-size:14px;color:var(--color-neutral-400);max-width:640px">No horário abaixo, a lista de mints do dia é montada e enviada pelos canais ativos. Com a tela aberta, o Discord e o aviso no PC disparam sozinhos; o WhatsApp abre com a mensagem pronta.</p>
+        </header>
+        <div style="display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:var(--space-8);align-items:start">
+          <div style="display:flex;flex-direction:column;gap:var(--space-4)">
+            <div class="field" style="max-width:200px"><label>Horário do lembrete (BRT)</label><input class="input" type="time" value="{{ settings.hour }}" data-f="hour" onChange="{{ onSetting }}"></div>
+            <div class="card elev-sm" style="gap:var(--space-3);padding:var(--space-4)">
+              <div style="display:flex;align-items:center;gap:var(--space-3)"><div class="card-title" style="flex:1;font-size:15px">WhatsApp</div><label class="radio"><input type="checkbox" checked="{{ settings.waOn }}" data-f="waOn" onChange="{{ onToggle }}"><span class="dot" style="border-radius:4px"></span><span style="font-size:12px;color:var(--color-neutral-500)">ativo</span></label></div>
+              <div class="field"><label>Número com DDI (só dígitos)</label><input class="input" placeholder="5511999999999" value="{{ settings.wa }}" data-f="wa" onChange="{{ onSetting }}"></div>
+              <div><a class="btn btn-primary" href="{{ waHref }}" target="_blank" rel="noopener">Abrir WhatsApp com a mensagem</a></div>
+            </div>
+            <div class="card elev-sm" style="gap:var(--space-3);padding:var(--space-4)">
+              <div style="display:flex;align-items:center;gap:var(--space-3)"><div class="card-title" style="flex:1;font-size:15px">Discord</div><label class="radio"><input type="checkbox" checked="{{ settings.dcOn }}" data-f="dcOn" onChange="{{ onToggle }}"><span class="dot" style="border-radius:4px"></span><span style="font-size:12px;color:var(--color-neutral-500)">ativo</span></label></div>
+              <div class="field"><label>Webhook do canal</label><input class="input" placeholder="https://discord.com/api/webhooks/…" value="{{ settings.webhook }}" data-f="webhook" onChange="{{ onSetting }}"></div>
+              <div style="display:flex;align-items:center;gap:var(--space-3)"><button class="btn btn-primary" onClick="{{ sendDiscord }}">Enviar agora</button><span style="font-size:12px;color:var(--color-neutral-400)">{{ dcStatus }}</span></div>
+            </div>
+            <div class="card elev-sm" style="gap:var(--space-3);padding:var(--space-4)">
+              <div style="display:flex;align-items:center;gap:var(--space-3)"><div class="card-title" style="flex:1;font-size:15px">Aviso no PC</div><label class="radio"><input type="checkbox" checked="{{ settings.pcOn }}" data-f="pcOn" onChange="{{ onTogglePc }}"><span class="dot" style="border-radius:4px"></span><span style="font-size:12px;color:var(--color-neutral-500)">ativo</span></label></div>
+              <p class="card-body">Notificação do sistema quando a página estiver aberta no horário. <span style="color:var(--color-neutral-400)">{{ pcStatus }}</span></p>
+              <div><button class="btn btn-secondary" onClick="{{ testPc }}">Testar agora</button></div>
+            </div>
+          </div>
+          <div style="position:sticky;top:var(--space-8)">
+            <h6 style="color:var(--color-neutral-500);margin-bottom:var(--space-3)">Prévia da mensagem · {{ digestDayLabel }}</h6>
+            <div style="display:flex;gap:var(--space-2);margin-bottom:var(--space-3)">
+              <div class="seg">
+                <label class="seg-opt"><input type="radio" checked="{{ digestIsToday }}" onChange="{{ digestToday }}"><span>Hoje</span></label>
+                <label class="seg-opt"><input type="radio" checked="{{ digestIsNext }}" onChange="{{ digestNext }}"><span>Próximo dia com mint</span></label>
+              </div>
+              <button class="btn btn-secondary" onClick="{{ copyDigest }}">{{ copyLabel }}</button>
+            </div>
+            <pre style="margin:0;padding:var(--space-6);background:var(--color-surface);border-radius:var(--radius-md);box-shadow:var(--shadow-sm);font:13px/1.7 ui-monospace, SFMono-Regular, Menlo, monospace;white-space:pre-wrap;color:var(--color-neutral-200)">{{ digestMsg }}</pre>
+          </div>
+        </div>
+      </div>
+    </sc-if>
+    </div>
+  </main>
+
+  <!-- DIALOG -->
+  <sc-if value="{{ dialogOpen }}" hint-placeholder-val="{{ false }}">
+    <div class="dialog-backdrop" style="z-index:50;backdrop-filter:blur(3px)" onClick="{{ closeDialog }}">
+      <div class="dialog" style="width:min(600px,100%);gap:var(--space-4);max-height:92vh;overflow:auto" onClick="{{ stop }}">
+        <div style="display:flex;align-items:baseline;gap:var(--space-3)">
+          <div class="dialog-title">{{ dialogTitle }}</div>
+          <sc-if value="{{ form.isEdit }}" hint-placeholder-val="{{ false }}"><button class="btn btn-ghost" style="margin-left:auto;color:var(--color-neutral-400)" onClick="{{ deleteItem }}">Excluir</button></sc-if>
+        </div>
+        <div class="field"><label>Nome</label><input class="input" autoFocus="{{ true }}" placeholder="Ex.: Terminal Cats" value="{{ form.name }}" data-f="name" onChange="{{ onField }}"></div>
+        <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:var(--space-4)">
+          <sc-for list="{{ formSegs }}" as="fg" hint-placeholder-count="3">
+            <div class="field"><label>{{ fg.label }}</label>
+              <div class="seg" style="display:flex">
+                <sc-for list="{{ fg.opts }}" as="o" hint-placeholder-count="2">
+                  <label class="seg-opt" style="flex:1;justify-content:center;white-space:nowrap;padding-inline:8px"><input type="radio" checked="{{ o.checked }}" onChange="{{ o.pick }}"><span>{{ o.label }}</span></label>
+                </sc-for>
+              </div>
+            </div>
+          </sc-for>
+        </div>
+        <div style="display:grid;grid-template-columns:1fr 1fr 1.4fr;gap:var(--space-4)">
+          <div class="field"><label>Data</label><input class="input" type="date" value="{{ form.date }}" data-f="date" onChange="{{ onField }}"></div>
+          <div class="field"><label>Horário (BRT)</label><input class="input" type="time" value="{{ form.time }}" data-f="time" onChange="{{ onField }}"></div>
+          <div class="field"><label>Status</label>
+            <div class="seg" style="display:flex">
+              <sc-for list="{{ statusOpts }}" as="o" hint-placeholder-count="3">
+                <label class="seg-opt" style="flex:1;justify-content:center;padding-inline:6px;white-space:nowrap"><input type="radio" checked="{{ o.checked }}" onChange="{{ o.pick }}"><span>{{ o.label }}</span></label>
+              </sc-for>
+            </div>
+          </div>
+        </div>
+        <div class="field"><label>Link do mint</label><input class="input" placeholder="https://" value="{{ form.link }}" data-f="link" onChange="{{ onField }}"></div>
+
+        <div style="padding:var(--space-4);border-radius:var(--radius-md);background:var(--color-bg);box-shadow:var(--shadow-sm);display:flex;flex-direction:column;gap:var(--space-3)">
+          <div style="display:flex;align-items:center;gap:var(--space-3)">
+            <div style="font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--color-accent)">Financeiro</div>
+            <div class="seg" style="margin-left:auto">
+              <sc-for list="{{ doneOpts }}" as="o" hint-placeholder-count="3">
+                <label class="seg-opt" style="padding:5px 10px;font-size:12px"><input type="radio" checked="{{ o.checked }}" onChange="{{ o.pick }}"><span>{{ o.label }}</span></label>
+              </sc-for>
+            </div>
+          </div>
+          <div style="display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:var(--space-4)">
+            <div class="field"><label>Custo do mint ({{ cur }})</label><input class="input" type="number" step="any" placeholder="0" value="{{ form.cost }}" data-f="cost" onChange="{{ onField }}"></div>
+            <div class="field"><label>Vendido por ({{ cur }})</label><input class="input" type="number" step="any" placeholder="0" value="{{ form.sold }}" data-f="sold" onChange="{{ onField }}"></div>
+            <div class="field"><label>Qtd mintada</label><input class="input" type="number" placeholder="1" value="{{ form.supply }}" data-f="supply" onChange="{{ onField }}"></div>
+            <div class="field"><label>Lucro</label><div class="input" style="display:flex;align-items:center;color:{{ formProfitColor }};font-weight:500;background:transparent">{{ formProfit }}</div></div>
+          </div>
+        </div>
+        <div class="field"><label>Observações</label><textarea class="input" style="min-height:56px" placeholder="horário original, condições, lembretes…" value="{{ form.notes }}" data-f="notes" onChange="{{ onField }}"></textarea></div>
+        <div class="dialog-actions">
+          <button class="btn btn-secondary" onClick="{{ closeDialog }}">Cancelar</button>
+          <button class="btn btn-primary" onClick="{{ saveForm }}">{{ saveLabel }}</button>
+        </div>
+      </div>
+    </div>
+  </sc-if>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;currency&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;default&quot;:&quot;$&quot;,&quot;options&quot;:[&quot;$&quot;,&quot;R$&quot;,&quot;ETH&quot;,&quot;SOL&quot;],&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;Financeiro&quot;},&quot;startView&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;default&quot;:&quot;dash&quot;,&quot;options&quot;:[&quot;dash&quot;,&quot;hoje&quot;,&quot;lista&quot;,&quot;cal&quot;,&quot;notif&quot;],&quot;tsType&quot;:&quot;'dash'|'hoje'|'lista'|'cal'|'notif'&quot;,&quot;section&quot;:&quot;Comportamento&quot;},&quot;showPast&quot;:{&quot;editor&quot;:&quot;boolean&quot;,&quot;default&quot;:true,&quot;tsType&quot;:&quot;boolean&quot;,&quot;section&quot;:&quot;Comportamento&quot;}}">
+const Y = new Date().getFullYear();
+const d = (mmdd) => mmdd ? `${Y}-${mmdd.slice(3, 5)}-${mmdd.slice(0, 2)}` : '';
+const mk = (name, wallet, type, chain, date, time, status, notes) => ({
+  id: name.toLowerCase().replace(/[^a-z0-9]+/g, '-') + '-' + wallet.toLowerCase(),
+  name, wallet, type: type || '', chain: chain || '', date: d(date), time: time || '',
+  status: status || (date && time ? 'Confirmado' : 'TBH'), notes: notes || '', cost: '', sold: '', link: '', supply: '', done: 'pendente'
+});
+const SEED = [
+  mk('Remilia: Civil War', 'Blowfly', 'FCFS', 'RH', '08/09', '05:20', 'Confirmado', '4h20 EST'),
+  mk('ubk', 'Blowfly', 'FCFS', 'RH', '', '', 'TBH'),
+  mk('Terminal Cats', 'Blowfly', 'GTD', 'RH', '', '', 'TBH'),
+  mk('The Floks', 'Blowfly', 'GTD', 'RH', '', '', 'TBH', '-$3'),
+  mk('Yield Farm', 'Blowfly', 'FCFS', 'RH', '15/09', '', 'TBH'),
+  mk('Kanz', 'Blowfly', 'FCFS', 'RH', '', '', 'TBH'),
+  mk('Bright Brokers', 'Blowfly', 'FCFS', 'RH', '09/09', '', 'TBH'),
+  mk('Arc Brookies', 'Blowfly', 'FCFS', 'ARC', '', '', 'TBH'),
+  mk('AGNT.Social', 'Blowfly', 'GTD', 'RH', '10/09', '10:00', 'Confirmado', '1pm UTC'),
+  mk('RichGirlsClub', 'Blowfly', 'GTD', 'ARC', '17/09', '', 'TBH'),
+  mk('SotkcSalesman', 'Blowfly', 'FCFS', 'RH', '', '', 'TBH'),
+  mk('Kashed', 'Blowfly', 'GTD', 'ARC', '', '', 'TBH'),
+  mk('Rowdies', 'Blowfly', 'GTD', 'RH', '', '', 'TBH'),
+  mk('BoyMeetsHood', 'Blowfly', 'GTD', 'RH', '', '', 'TBH'),
+  mk('Arcana', 'Blowfly', 'FCFS', 'ARC', '', '', 'TBH'),
+  mk('Rojak', 'Blowfly', '', '', '', '', 'TBH'),
+  mk('Mana Wizards', 'Blowfly', '', '', '', '', 'TBH'),
+  mk('The Alms', 'Blowfly', '', '', '', '', 'TBH'),
+  mk('Akai', 'MEGA', 'GTD', '', '23/09', '15:15', 'Confirmado'),
+  mk('Stock Salesman', 'MEGA', 'GTD', '', '', '', 'TBH'),
+  mk('Arc Machines', 'MEGA', 'GTD', '', '', '', 'TBH', 'talvez 15/09'),
+  mk('Reeve', 'MEGA', 'FCFS', '', '', '', 'TBH'),
+  mk('Zec Punks', 'MEGA', 'GTD', '', '', '', 'TBH'),
+  mk('Broke Bookies', 'MEGA', '', '', '', '', 'TBA'),
+  mk('Porkalus', 'MEGA', 'GTD', '', '', '', 'TBA'),
+  mk('Misfits', 'MEGA', 'GTD + FCFS', '', '16/09', '', 'TBH'),
+  mk('Juicehedz', 'MEGA', 'FCFS', '', '', '', 'TBH'),
+  mk('Imprint', 'MEGA', 'FCFS', '', '', '', 'TBH'),
+  mk('Arc Chibi', 'MEGA', '', '', '', '', 'TBH'),
+  mk('Fortune Foes', 'MEGA', '', '', '15/09', '06:00', 'Confirmado', '6h da manhã'),
+];
+const LS_ITEMS = 'gestor-wl-items', LS_SET = 'gestor-wl-settings', LS_NOTIFIED = 'gestor-wl-notified';
+const WALLETS = ['Blowfly', 'MEGA'], TYPES = ['FCFS', 'GTD', 'GTD + FCFS'], CHAINS = ['RH', 'ARC'], STATUSES = ['Confirmado', 'TBH', 'TBA'];
+const WD = ['dom', 'seg', 'ter', 'qua', 'qui', 'sex', 'sáb'];
+const WDL = ['domingo', 'segunda', 'terça', 'quarta', 'quinta', 'sexta', 'sábado'];
+const MON = ['janeiro', 'fevereiro', 'março', 'abril', 'maio', 'junho', 'julho', 'agosto', 'setembro', 'outubro', 'novembro', 'dezembro'];
+const pad = n => String(n).padStart(2, '0');
+const cap = s => s[0].toUpperCase() + s.slice(1);
+const iso = dt => `${dt.getFullYear()}-${pad(dt.getMonth() + 1)}-${pad(dt.getDate())}`;
+const fromIso = s => { const [y, m, dd] = s.split('-').map(Number); return new Date(y, m - 1, dd); };
+const short = s => { const dt = fromIso(s); return `${WD[dt.getDay()]} ${pad(dt.getDate())}/${pad(dt.getMonth() + 1)}`; };
+const load = (k, fb) => { try { const v = JSON.parse(localStorage.getItem(k)); return v ?? fb; } catch (e) { return fb; } };
+const num = v => { const n = parseFloat(String(v ?? '').replace(',', '.')); return isNaN(n) ? 0 : n; };
+const EMPTY = { name: '', wallet: 'Blowfly', type: 'FCFS', chain: 'RH', date: '', time: '', status: 'TBH', cost: '', sold: '', link: '', supply: '', notes: '', done: 'pendente' };
+const TYPE_COLORS = { 'FCFS': 'var(--color-accent-400)', 'GTD': 'var(--color-accent-600)', 'GTD + FCFS': 'var(--color-accent-800)', 'Sem tipo': 'var(--color-neutral-700)' };
+const WDOT = { Blowfly: 'oklch(0.82 0.15 88)', MEGA: 'oklch(0.72 0.14 250)' };
+const WTAG = { Blowfly: ['oklch(0.42 0.09 85)', 'oklch(0.93 0.12 90)'], MEGA: ['oklch(0.42 0.1 250)', 'oklch(0.92 0.07 250)'] };
+const WCAL = { Blowfly: 'oklch(0.36 0.07 85)', MEGA: 'oklch(0.36 0.08 250)' };
+const STAG = { Confirmado: ['oklch(0.40 0.09 150)', 'oklch(0.92 0.10 150)'], TBH: ['oklch(0.42 0.10 55)', 'oklch(0.92 0.09 60)'], TBA: ['var(--color-neutral-800)', 'var(--color-neutral-100)'], Mintado: ['var(--color-accent-800)', 'var(--color-accent-100)'], Pulado: ['oklch(0.40 0.10 25)', 'oklch(0.92 0.06 25)'] };
+const POS = 'var(--color-accent-300)', NEG = 'var(--color-neutral-400)';
+
+class Component extends DCLogic {
+  state = {
+    tab: null,
+    items: (load(LS_ITEMS, null) || SEED).map(i => ({ cost: '', sold: '', ...i })),
+    settings: { hour: '08:00', wa: '', waOn: true, webhook: '', dcOn: true, pcOn: false, ...load(LS_SET, {}) },
+    filters: { q: '', wallet: 'Todas', type: 'Todos', chain: 'Todas', done: 'Pendentes' },
+    dashScope: 'Tudo', cal: null, form: null, dcStatus: '', copyLabel: 'Copiar', digestMode: 'today', now: new Date(),
+  };
+  componentDidMount() {
+    this.tick = setInterval(() => { this.setState({ now: new Date() }); this.checkReminder(); }, 30000);
+    this.checkReminder();
+  }
+  componentWillUnmount() { clearInterval(this.tick); }
+  cur() { return this.props.currency ?? '$'; }
+  money(n) { const s = Math.abs(n).toLocaleString('pt-BR', { maximumFractionDigits: 2 }); return `${n < 0 ? '−' : ''}${this.cur()} ${s}`; }
+  persist(items) { this.setState({ items }); localStorage.setItem(LS_ITEMS, JSON.stringify(items)); }
+  setSetting(k, v) { const settings = { ...this.state.settings, [k]: v }; this.setState({ settings }); localStorage.setItem(LS_SET, JSON.stringify(settings)); }
+  update(id, patch) { this.persist(this.state.items.map(i => i.id === id ? { ...i, ...patch } : i)); }
+
+  digest(dayIso, items) {
+    if (!items.length) return `Nenhum mint em ${short(dayIso)}.`;
+    const lines = items.map(i => `• ${i.time || 'horário TBH'} — ${i.name}  [${[i.wallet, i.type, i.chain].filter(Boolean).join(' · ')}]${num(i.cost) ? ' · custo ' + this.money(num(i.cost)) : ''}${i.link ? '\n  ' + i.link : ''}`);
+    return `Mints de ${short(dayIso)} (BRT):\n${lines.join('\n')}`;
+  }
+  todayIso() { return iso(this.state.now); }
+  itemsOn(day) { return this.state.items.filter(i => i.date === day).sort((a, b) => (a.time || '99').localeCompare(b.time || '99')); }
+  nextDay() { const t = this.todayIso(); const ds = [...new Set(this.state.items.filter(i => i.date > t).map(i => i.date))].sort(); return ds[0] || null; }
+
+  async checkReminder() {
+    const { settings } = this.state; const t = this.todayIso();
+    const hhmm = `${pad(this.state.now.getHours())}:${pad(this.state.now.getMinutes())}`;
+    if (hhmm < settings.hour || localStorage.getItem(LS_NOTIFIED) === t) return;
+    const items = this.itemsOn(t).filter(i => i.done === 'pendente');
+    if (!items.length) return;
+    localStorage.setItem(LS_NOTIFIED, t);
+    const msg = this.digest(t, items);
+    if (settings.pcOn && 'Notification' in window && Notification.permission === 'granted') new Notification(`${items.length} mint(s) hoje`, { body: msg });
+    if (settings.dcOn && settings.webhook) this.postDiscord(msg);
+  }
+  async postDiscord(msg) {
+    const { webhook } = this.state.settings;
+    if (!webhook) return this.setState({ dcStatus: 'Cole o webhook primeiro.' });
+    this.setState({ dcStatus: 'Enviando…' });
+    try { const r = await fetch(webhook, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ content: msg }) }); this.setState({ dcStatus: r.ok ? 'Enviado.' : `Falhou (${r.status}).` }); }
+    catch (e) { this.setState({ dcStatus: 'Falhou — verifique o webhook.' }); }
+  }
+
+  view(i) {
+    const done = i.done !== 'pendente', minted = i.done === 'mintado';
+    const cost = num(i.cost), sold = num(i.sold), profit = sold - cost;
+    return {
+      ...i,
+      timeLabel: i.time || '—', timeShort: i.time || 'TBH', timeSub: i.time ? 'BRT' : 'horário TBH',
+      chainLabel: i.chain || '', supplyLabel: i.supply || (minted ? '1' : ''), note: i.notes || '',
+      costLabel: cost || minted ? this.money(cost) : '', soldLabel: sold || minted ? this.money(sold) : '',
+      profitLabel: minted || sold ? this.money(profit) : '', profitColor: profit < 0 ? NEG : POS,
+      dateShort: i.date ? short(i.date) : 'sem data',
+      dateTime: i.date ? `${short(i.date)}${i.time ? ' · ' + i.time : ''}` : '—',
+      walletBg: (WTAG[i.wallet] || WTAG.MEGA)[0], walletFg: (WTAG[i.wallet] || WTAG.MEGA)[1],
+      calBg: WCAL[i.wallet] || WCAL.MEGA,
+      dot: WDOT[i.wallet],
+      statusLabel: done ? (minted ? 'Mintado' : 'Pulado') : i.status,
+      statusBg: (STAG[done ? (minted ? 'Mintado' : 'Pulado') : i.status] || STAG.TBA)[0], statusFg: (STAG[done ? (minted ? 'Mintado' : 'Pulado') : i.status] || STAG.TBA)[1],
+      hasLink: !!i.link, opacity: done ? 0.5 : 1, deco: minted ? 'line-through' : 'none',
+      ring: minted ? '0 0 0 1px var(--color-accent-700)' : 'var(--shadow-sm)',
+      mintLabel: minted ? 'Desfazer' : 'Mintado', skipLabel: i.done === 'pulado' ? 'Desfazer' : 'Pular',
+      mint: () => { if (minted) this.update(i.id, { done: 'pendente' }); else { this.update(i.id, { done: 'mintado' }); this.setState({ form: { ...i, done: 'mintado', isEdit: true } }); } },
+      skip: () => this.update(i.id, { done: i.done === 'pulado' ? 'pendente' : 'pulado' }),
+      edit: () => this.setState({ form: { ...i, isEdit: true } }),
+    };
+  }
+  seg(label, opts, cur, set) { return { label, opts: opts.map(v => ({ label: v, checked: cur === v, pick: () => set(v) })) }; }
+
+  renderVals() {
+    const { items, settings, filters, form, now, dashScope } = this.state;
+    const tab = this.state.tab || this.props.startView || 'dash';
+    const t = this.todayIso();
+    const cur = this.cur();
+    const go = k => () => this.setState({ tab: k });
+    const todayAll = this.itemsOn(t);
+    const badges = { dash: '', hoje: todayAll.filter(i => i.done === 'pendente').length || '', lista: items.length, cal: '', notif: settings.waOn || settings.dcOn || settings.pcOn ? 'on' : '' };
+    const tabs = [['dash', 'Dashboard'], ['hoje', 'Hoje'], ['lista', 'Lista'], ['cal', 'Calendário'], ['notif', 'Notificações']].map(([k, label]) => ({
+      label, go: go(k), badge: String(badges[k]), color: tab === k ? 'var(--color-accent-200)' : 'var(--color-neutral-400)',
+      bg: tab === k ? 'var(--color-surface)' : 'transparent', ring: tab === k ? 'inset 2px 0 0 var(--color-accent)' : 'none'
+    }));
+    const byW = w => items.filter(i => i.wallet === w);
+    const walletCards = WALLETS.map(w => { const list = byW(w); return { name: w, dot: WDOT[w], count: list.length, sub: `${list.filter(i => i.done === 'mintado').length} mintadas · ${list.filter(i => !i.date && i.done === 'pendente').length} sem data` }; });
+
+    // ---- dashboard
+    const scoped = dashScope === 'Tudo' ? items : items.filter(i => i.wallet === dashScope);
+    const mintedItems = scoped.filter(i => i.done === 'mintado');
+    const sum = (list, k) => list.reduce((a, i) => a + num(i[k]), 0);
+    const totCost = sum(mintedItems, 'cost'), totSold = sum(mintedItems, 'sold'), totProfit = totSold - totCost;
+    const pendingDated = scoped.filter(i => i.done === 'pendente' && i.date >= t).length;
+    const kpis = [
+      { label: 'WL totais', value: scoped.length, sub: `${byW('Blowfly').length} Blowfly · ${byW('MEGA').length} MEGA`, color: 'var(--color-text)' },
+      { label: 'Mintadas', value: mintedItems.length, sub: `${scoped.filter(i => i.done === 'pulado').length} puladas · ${pendingDated} agendadas`, color: 'var(--color-text)' },
+      { label: 'Gasto', value: this.money(totCost), sub: 'soma dos custos de mint', color: 'var(--color-text)' },
+      { label: 'Vendido', value: this.money(totSold), sub: 'soma das vendas', color: 'var(--color-text)' },
+      { label: 'Lucro', value: this.money(totProfit), sub: totCost ? `ROI ${Math.round(totProfit / totCost * 100)}%` : 'registre custo e venda', color: totProfit < 0 ? NEG : 'var(--color-accent-300)' },
+    ];
+    const typeOf = i => i.type || 'Sem tipo';
+    const TYPE_KEYS = ['FCFS', 'GTD', 'GTD + FCFS', 'Sem tipo'];
+    const typeCounts = TYPE_KEYS.map(k => ({ label: k, color: TYPE_COLORS[k], count: scoped.filter(i => typeOf(i) === k).length }));
+    const typeLegend = typeCounts.map(x => ({ ...x, pct: scoped.length ? Math.round(x.count / scoped.length * 100) + '%' : '0%' }));
+    const walletBars = (dashScope === 'Tudo' ? WALLETS : [dashScope]).map(w => {
+      const list = byW(w);
+      return { name: w, count: list.length, minted: list.filter(i => i.done === 'mintado').length,
+        segs: TYPE_KEYS.map(k => { const c = list.filter(i => typeOf(i) === k).length; return { title: `${k}: ${c}`, w: list.length ? (c / list.length * 100) + '%' : '0%', color: TYPE_COLORS[k] }; }).filter(s => s.w !== '0%') };
+    });
+    let acc = 0; const stops = typeCounts.filter(x => x.count).map(x => { const from = acc; acc += scoped.length ? x.count / scoped.length * 100 : 0; return `${x.color} ${from}% ${acc}%`; });
+    const donutBg = stops.length ? `conic-gradient(${stops.join(', ')})` : 'var(--color-neutral-900)';
+    const gtd = scoped.filter(i => (i.type || '').includes('GTD')).length;
+    const agendaDays = [...new Set(scoped.filter(i => i.date).map(i => i.date))].sort().slice(0, 8);
+    const agendaMax = Math.max(1, ...agendaDays.map(dd => scoped.filter(i => i.date === dd).length));
+    const agendaBars = agendaDays.map(dd => { const c = scoped.filter(i => i.date === dd).length; const past = dd < t, today = dd === t;
+      return { count: c, h: (c / agendaMax * 100) + '%', label: short(dd), title: scoped.filter(i => i.date === dd).map(i => i.name).join(', '),
+        color: today ? 'var(--color-accent)' : past ? 'var(--color-neutral-800)' : 'var(--color-accent-700)', numColor: past ? 'var(--color-neutral-600)' : 'var(--color-text)', labelColor: today ? 'var(--color-accent)' : 'var(--color-neutral-500)' }; });
+    const series = mintedItems.filter(i => num(i.cost) || num(i.sold)).sort((a, b) => (a.date || '9').localeCompare(b.date || '9'));
+    let run = 0; const cum = series.map(i => (run += num(i.sold) - num(i.cost)));
+    const allY = [0, ...cum]; const yMin = Math.min(...allY), yMax = Math.max(...allY), span = yMax - yMin || 1;
+    const px = k => series.length > 1 ? k / (series.length - 1) * 600 : 300;
+    const py = v => 10 + (1 - (v - yMin) / span) * 130;
+    const lineDots = cum.map((v, k) => ({ x: px(k), y: py(v) }));
+    const linePts = lineDots.map(p => `${p.x},${p.y}`).join(' ');
+    const areaPts = lineDots.length ? `${lineDots[0].x},${py(0)} ${linePts} ${lineDots[lineDots.length - 1].x},${py(0)}` : '';
+    const walletPnl = WALLETS.map(w => { const list = byW(w).filter(i => i.done === 'mintado'); const c = sum(list, 'cost'), s = sum(list, 'sold'), p = s - c;
+      return { name: w, dot: WDOT[w], minted: list.length, cost: this.money(c), sold: this.money(s), profit: this.money(p), profitColor: p < 0 ? NEG : POS,
+        roiW: c ? Math.max(0, Math.min(100, s / c * 50)) + '%' : '0%', roiLabel: c ? `ROI ${Math.round(p / c * 100)}% · cada ${cur} 1 gasto virou ${cur} ${(s / c).toFixed(2)}` : 'sem custo registrado ainda' }; });
+    const pnlRows = mintedItems.sort((a, b) => (b.date || '').localeCompare(a.date || '')).map(i => this.view(i));
+
+    // ---- hoje
+    const todayItems = todayAll.map(i => this.view(i));
+    const pastItems = (this.props.showPast ?? true) ? items.filter(i => i.date && i.date < t && i.done === 'pendente').sort((a, b) => a.date.localeCompare(b.date)).map(i => this.view(i)) : [];
+    const futureDays = [...new Set(items.filter(i => i.date > t).map(i => i.date))].sort();
+    const upcoming = futureDays.map(day => { const dt = fromIso(day); const diff = Math.round((dt - fromIso(t)) / 864e5);
+      return { weekday: cap(WDL[dt.getDay()]), dateShort: `${pad(dt.getDate())}/${pad(dt.getMonth() + 1)}`, rel: diff === 1 ? 'amanhã' : `em ${diff} dias`, items: this.itemsOn(day).map(i => this.view(i)) }; });
+    const undated = items.filter(i => !i.date && i.done === 'pendente').map(i => this.view(i));
+    const pending = todayItems.filter(i => i.done === 'pendente').length;
+    const nd = this.nextDay();
+
+    // ---- lista
+    const setF = (k, v) => this.setState({ filters: { ...filters, [k]: v } });
+    const filterGroups = [
+      this.seg('Wallet', ['Todas', ...WALLETS], filters.wallet, v => setF('wallet', v)),
+      this.seg('Tipo', ['Todos', ...TYPES], filters.type, v => setF('type', v)),
+      this.seg('Chain', ['Todas', ...CHAINS], filters.chain, v => setF('chain', v)),
+      this.seg('Status', ['Pendentes', 'Mintados', 'Pulados', 'Tudo'], filters.done, v => setF('done', v)),
+    ];
+    const q = filters.q.trim().toLowerCase();
+    const listRows = items.filter(i =>
+      (!q || i.name.toLowerCase().includes(q)) &&
+      (filters.wallet === 'Todas' || i.wallet === filters.wallet) &&
+      (filters.type === 'Todos' || (i.type || '').includes(filters.type)) &&
+      (filters.chain === 'Todas' || i.chain === filters.chain) &&
+      (filters.done === 'Tudo' || (filters.done === 'Pendentes' ? i.done === 'pendente' : filters.done === 'Mintados' ? i.done === 'mintado' : i.done === 'pulado'))
+    ).sort((a, b) => (a.date ? 0 : 1) - (b.date ? 0 : 1) || (a.date || '').localeCompare(b.date || '') || a.name.localeCompare(b.name)).map(i => this.view(i));
+
+    // ---- calendário
+    const cal = this.state.cal || { y: now.getFullYear(), m: now.getMonth() };
+    const first = new Date(cal.y, cal.m, 1); const start = new Date(cal.y, cal.m, 1 - first.getDay());
+    const weeks = [];
+    for (let w = 0; w < 6; w++) {
+      const days = [];
+      for (let k = 0; k < 7; k++) {
+        const dt = new Date(start); dt.setDate(start.getDate() + w * 7 + k); const di = iso(dt); const inM = dt.getMonth() === cal.m;
+        days.push({ num: dt.getDate(), opacity: inM ? 1 : 0.35, ring: di === t ? 'inset 0 0 0 1px var(--color-accent)' : 'var(--shadow-sm)', numColor: di === t ? 'var(--color-accent)' : 'var(--color-neutral-400)', items: this.itemsOn(di).map(i => this.view(i)) });
+      }
+      weeks.push({ days });
+      if (new Date(start.getFullYear(), start.getMonth(), start.getDate() + (w + 1) * 7).getMonth() !== cal.m && w >= 3) break;
+    }
+    const shiftCal = n => () => { const dt = new Date(cal.y, cal.m + n, 1); this.setState({ cal: { y: dt.getFullYear(), m: dt.getMonth() } }); };
+
+    // ---- notificações
+    const digestDay = this.state.digestMode === 'today' || !nd ? t : nd;
+    const digestMsg = this.digest(digestDay, this.itemsOn(digestDay).filter(i => i.done === 'pendente'));
+    const waHref = `https://wa.me/${settings.wa.replace(/\D/g, '')}?text=${encodeURIComponent(digestMsg)}`;
+    const perm = 'Notification' in window ? Notification.permission : 'unsupported';
+
+    // ---- form
+    const setForm = (k, v) => this.setState({ form: { ...form, [k]: v } });
+    const f = form || EMPTY;
+    const formSegs = form ? [
+      this.seg('Wallet', WALLETS, f.wallet, v => setForm('wallet', v)),
+      this.seg('Tipo', TYPES, f.type, v => setForm('type', v)),
+      this.seg('Chain', CHAINS, f.chain, v => setForm('chain', v)),
+    ] : [];
+    const statusOpts = form ? STATUSES.map(v => ({ label: v, checked: f.status === v, pick: () => setForm('status', v) })) : [];
+    const doneOpts = form ? [['pendente', 'Pendente'], ['mintado', 'Mintado'], ['pulado', 'Pulado']].map(([v, label]) => ({ label, checked: f.done === v, pick: () => setForm('done', v) })) : [];
+    const fp = num(f.sold) - num(f.cost);
+
+    return {
+      tabs, walletCards, isDash: tab === 'dash', isHoje: tab === 'hoje', isLista: tab === 'lista', isCal: tab === 'cal', isNotif: tab === 'notif',
+      nowLabel: `${pad(now.getHours())}:${pad(now.getMinutes())} BRT · ${short(t)}`, cur,
+      dashSummary: `${items.length} WL em 2 wallets · ${mintedItems.length} mintadas · ${undated.length} ainda sem data`,
+      dashScopeOpts: ['Tudo', ...WALLETS].map(v => ({ label: v, checked: dashScope === v, pick: () => this.setState({ dashScope: v }) })),
+      kpis, walletBars, typeLegend, donutBg, donutCenter: scoped.length ? Math.round(gtd / scoped.length * 100) + '%' : '0%', donutCenterSub: 'GTD',
+      agendaBars, hasAgenda: agendaBars.length > 0, noAgenda: agendaBars.length === 0,
+      profitTotal: this.money(totProfit), profitColor: totProfit < 0 ? NEG : POS,
+      hasProfitLine: lineDots.length > 0, noProfitLine: lineDots.length === 0, zeroY: py(0), linePts, areaPts, lineDots,
+      lineFirst: series.length ? `${series[0].name} · ${series[0].date ? short(series[0].date) : ''}` : '', lineLast: series.length > 1 ? `${series[series.length - 1].name} · ${series[series.length - 1].date ? short(series[series.length - 1].date) : ''}` : '',
+      walletPnl, pnlRows, hasPnl: pnlRows.length > 0, noPnl: pnlRows.length === 0, pnlCount: pnlRows.length ? `${pnlRows.length} · lucro ${this.money(sum(mintedItems, 'sold') - sum(mintedItems, 'cost'))}` : '',
+      todayLong: `${cap(WDL[now.getDay()])}, ${now.getDate()} de ${MON[now.getMonth()]}`,
+      todayStats: [{ value: pending, label: 'pra mintar hoje' }, { value: futureDays.length, label: 'dias agendados' }, { value: undated.length, label: 'sem data' }],
+      todayItems, hasToday: todayItems.length > 0, noToday: todayItems.length === 0, nextLabel: nd ? `${short(nd)} — ${this.itemsOn(nd).map(i => i.name).join(', ')}` : 'nenhum marcado',
+      pastItems, hasPast: pastItems.length > 0, pastCount: pastItems.length,
+      upcoming, hasUpcoming: upcoming.length > 0, noUpcoming: upcoming.length === 0,
+      undated, undatedCount: undated.length,
+      filters, onSearch: e => setF('q', e.target.value), filterGroups, listRows,
+      listSummary: `${listRows.length} de ${items.length} WL · ${byW('Blowfly').length} Blowfly · ${byW('MEGA').length} MEGA`,
+      calTitle: `${MON[cal.m]} ${cal.y}`, weekdays: WD, weeks, calPrev: shiftCal(-1), calNext: shiftCal(1), calToday: () => this.setState({ cal: null }),
+      settings, onSetting: e => this.setSetting(e.target.dataset.f, e.target.value), onToggle: e => this.setSetting(e.target.dataset.f, e.target.checked),
+      onTogglePc: async e => { const on = e.target.checked; if (on && 'Notification' in window && Notification.permission !== 'granted') await Notification.requestPermission(); this.setSetting('pcOn', on); this.forceUpdate(); },
+      pcStatus: perm === 'granted' ? 'Permissão concedida.' : perm === 'denied' ? 'Permissão negada no navegador.' : perm === 'unsupported' ? 'Navegador sem suporte.' : 'Ative para pedir permissão.',
+      testPc: () => { if (Notification.permission === 'granted') new Notification('Gestor WL', { body: digestMsg }); else Notification.requestPermission().then(() => this.forceUpdate()); },
+      waHref, sendDiscord: () => this.postDiscord(digestMsg), dcStatus: this.state.dcStatus,
+      digestMsg, digestDayLabel: short(digestDay), digestIsToday: digestDay === t, digestIsNext: digestDay !== t,
+      digestToday: () => this.setState({ digestMode: 'today' }), digestNext: () => this.setState({ digestMode: 'next' }),
+      copyLabel: this.state.copyLabel, copyDigest: async () => { try { await navigator.clipboard.writeText(digestMsg); this.setState({ copyLabel: 'Copiado' }); setTimeout(() => this.setState({ copyLabel: 'Copiar' }), 1500); } catch (e) {} },
+      openNew: () => this.setState({ form: { ...EMPTY, date: t } }),
+      dialogOpen: !!form, form: f, dialogTitle: f.isEdit ? (f.done === 'mintado' ? 'Registrar mint' : 'Editar WL') : 'Nova WL', saveLabel: f.isEdit ? 'Salvar' : 'Cadastrar',
+      formSegs, statusOpts, doneOpts, formProfit: f.cost || f.sold ? this.money(fp) : '—', formProfitColor: fp < 0 ? NEG : POS,
+      onField: e => setForm(e.target.dataset.f, e.target.value),
+      closeDialog: () => this.setState({ form: null }), stop: e => e.stopPropagation(),
+      saveForm: () => {
+        if (!f.name.trim()) return;
+        const status = f.date && f.time ? 'Confirmado' : f.status;
+        const { isEdit, ...rest } = f;
+        if (isEdit) this.update(f.id, { ...rest, status }); else this.persist([...items, { ...rest, status, id: 'wl-' + Date.now() }]);
+        this.setState({ form: null });
+      },
+      deleteItem: () => { this.persist(items.filter(i => i.id !== f.id)); this.setState({ form: null }); },
+    };
+  }
+}
+</script>
+</body>
+</html>
