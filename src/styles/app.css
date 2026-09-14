@@ -1,0 +1,35 @@
+html, body {
+  margin: 0;
+  min-height: 100%;
+  background: var(--color-bg);
+  color: var(--color-text);
+  font-family: var(--font-body);
+}
+
+a { color: var(--color-accent); }
+a:hover { color: var(--color-accent-400); }
+
+input[type=date]::-webkit-calendar-picker-indicator,
+input[type=time]::-webkit-calendar-picker-indicator { filter: invert(0.8); }
+
+@keyframes wl-rise {
+  from { opacity: 0; transform: translateY(6px); }
+  to   { opacity: 1; transform: none; }
+}
+
+@keyframes wl-grow {
+  from { transform: scaleY(0); }
+  to   { transform: scaleY(1); }
+}
+
+.wl-shell {
+  min-height: 100vh;
+  display: grid;
+  grid-template-columns: 232px minmax(0, 1fr);
+  background:
+    radial-gradient(900px 420px at 30% -10%, var(--color-accent-900) 0%, transparent 65%),
+    var(--color-bg);
+}
+
+.wl-main { min-width: 0; padding: var(--space-8) 40px 96px; box-sizing: border-box; }
+.wl-page { max-width: 1080px; margin: 0 auto; animation: wl-rise .35s ease-out; }
