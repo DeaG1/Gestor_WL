@@ -16,6 +16,7 @@ describe('filterItems — busca e filtros', () => {
     make({ name: 'Akai', wallet: 'MEGA', type: 'GTD', chain: '' }),
     make({ name: 'Misfits', wallet: 'MEGA', type: 'GTD + FCFS', chain: '' }),
     make({ name: 'Arcana', wallet: 'Blowfly', type: 'FCFS', chain: 'ARC', done: 'mintado' }),
+    make({ name: 'Rojak', wallet: 'Blowfly', type: '', chain: '', done: 'pulado' }),
   ];
 
   it('busca por nome, sem diferenciar maiúsculas', () => {
@@ -41,6 +42,7 @@ describe('filterItems — busca e filtros', () => {
 
   it('filtra por situação', () => {
     expect(filterItems(items, f({ done: 'Mintados' })).map((i) => i.name)).toEqual(['Arcana']);
+    expect(filterItems(items, f({ done: 'Pulados' })).map((i) => i.name)).toEqual(['Rojak']);
     expect(filterItems(items, f({ done: 'Pendentes' })).length).toBe(3);
   });
 });
