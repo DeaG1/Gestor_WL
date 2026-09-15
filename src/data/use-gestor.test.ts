@@ -111,4 +111,26 @@ describe('useGestor — mutações otimistas', () => {
     act(() => { result.current.dismissError(); });
     expect(result.current.error).toBeNull();
   });
+
+  it('restaura a lista quando duas alterações partem juntas e a segunda falha', async () => {
+    const repos = fakeRepos({
+      listItems: vi.fn().mockResolvedValue([item(), item({ id: '2', name: 'Akai' })]),
+      updateItem: vi.fn()
+        .mockResolvedValueOnce(undefined)
+        .mockRejectedValueOnce(new Error('falhou')),
+    });
+    const { result } = renderHook(() => useGestor(repos));
+    await waitFor(() => expect(result.current.loading).toBe(false));
+
+    await act(async () => {
+      await Promise.all([
+        result.current.saveItem('1', { done: 'mintado' }),
+        result.current.saveItem('2', { done: 'pulado' }),
+      ]);
+    });
+
+    expect(result.current.items).toHaveLength(2);
+    expect(result.current.items.find((i) => i.id === '2')?.done).toBe('pendente');
+    expect(result.current.error).toBe('falhou');
+  });
 });
