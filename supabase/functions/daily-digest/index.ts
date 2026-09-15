@@ -7,10 +7,19 @@ const URL = Deno.env.get('SUPABASE_URL')!;
 const SERVICE_ROLE = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
 const ANON = Deno.env.get('SUPABASE_ANON_KEY')!;
 
+// Supabase não injeta CORS nas Edge Functions — cada função cuida do seu.
+// supabase.functions.invoke manda Authorization + Content-Type, o que força
+// um preflight OPTIONS; sem esses headers o navegador bloqueia a chamada.
+const CORS = {
+  'Access-Control-Allow-Origin': '*',
+  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
+  'Access-Control-Allow-Methods': 'POST, OPTIONS',
+};
+
 const json = (body: unknown, status = 200) =>
   new Response(JSON.stringify(body), {
     status,
-    headers: { 'Content-Type': 'application/json' },
+    headers: { 'Content-Type': 'application/json', ...CORS },
   });
 
 interface ItemRow {
@@ -150,6 +159,7 @@ const runTest = async (req: Request): Promise<Response> => {
 };
 
 Deno.serve(async (req) => {
+  if (req.method === 'OPTIONS') return new Response(null, { status: 200, headers: CORS });
   const body = await req.json().catch(() => ({}));
   return body?.mode === 'test' ? runTest(req) : runCron(req);
 });
