@@ -24,7 +24,8 @@ select cron.schedule(
         select decrypted_secret from vault.decrypted_secrets where name = 'service_role_key'
       )
     ),
-    body    := jsonb_build_object('mode', 'cron')
+    body    := jsonb_build_object('mode', 'cron'),
+    timeout_milliseconds := 30000
   );
   $$
 );

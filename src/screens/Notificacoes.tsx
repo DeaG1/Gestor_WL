@@ -24,8 +24,9 @@ const lastNoteText = (n: LastNotification | null, today: string): string => {
   const timeLabel = n.sentAt ? nowHHMM(new Date(n.sentAt)) : '';
   const when = timeLabel ? `${dayLabel} ${timeLabel}` : dayLabel;
   if (n.status === 'ok') return `último envio: ${when} · ok`;
+  if (n.status === 'sending') return `último envio: ${when} · enviando…`;
   if (n.error) return `último envio: ${when} · falhou — ${n.error}`;
-  return '';
+  return `último envio: ${when} · falhou`;
 };
 
 const pcStatusText = (): string => {

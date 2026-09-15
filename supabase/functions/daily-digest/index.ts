@@ -42,6 +42,7 @@ const postToDiscord = async (webhook: string, content: string): Promise<number> 
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ content }),
+    signal: AbortSignal.timeout(10_000),
   });
   return res.status;
 };
@@ -81,7 +82,7 @@ const runCron = async (req: Request): Promise<Response> => {
   for (const u of users ?? []) {
     const { data: log } = await db
       .from('notification_log')
-      .select('status, attempts')
+      .select('status, attempts, claimed_at')
       .eq('user_id', u.user_id).eq('day', day).eq('channel', 'discord')
       .maybeSingle();
 
@@ -90,27 +91,38 @@ const runCron = async (req: Request): Promise<Response> => {
       webhook: u.discord_webhook,
       reminderHour: String(u.reminder_hour).slice(0, 5),
       nowHHMM: hhmm,
-      log: log as { status: 'sending' | 'ok' | 'error'; attempts: number } | null,
+      now: new Date(),
+      log: log
+        ? {
+            status: log.status as 'sending' | 'ok' | 'error',
+            attempts: log.attempts as number,
+            claimedAt: log.claimed_at as string | null,
+          }
+        : null,
     });
     if (!eligible) continue;
 
     const items = await pendingOn(db, u.user_id, day);
     if (!items.length) continue; // dia sem mint é silencioso
 
-    // Reivindica antes de enviar. A chave composta impede dois envios.
+    // Reivindica antes de enviar. A chave composta impede dois envios; claimed_at
+    // marca quando, para um tick futuro poder destravar um claim que ficou parado.
+    const claimedAt = new Date().toISOString();
     if (!log) {
       const { error } = await db.from('notification_log')
-        .insert({ user_id: u.user_id, day, channel: 'discord', status: 'sending', attempts: 1 });
+        .insert({ user_id: u.user_id, day, channel: 'discord', status: 'sending', attempts: 1, claimed_at: claimedAt });
       if (error) continue; // outro tick chegou primeiro
     } else {
       await db.from('notification_log')
-        .update({ status: 'sending', attempts: log.attempts + 1 })
+        .update({ status: 'sending', attempts: log.attempts + 1, claimed_at: claimedAt })
         .eq('user_id', u.user_id).eq('day', day).eq('channel', 'discord');
     }
 
-    const content = buildDigest(day, items.map(toDigestItem), u.currency);
-
+    // A partir daqui a linha está reivindicada: qualquer falha, esperada ou
+    // não, precisa terminar em 'error' — nunca deixar presa em 'sending'.
+    let settled = false;
     try {
+      const content = buildDigest(day, items.map(toDigestItem), u.currency);
       const status = await postToDiscord(u.discord_webhook, content);
       const ok = status >= 200 && status < 300;
       await db.from('notification_log')
@@ -120,11 +132,19 @@ const runCron = async (req: Request): Promise<Response> => {
           sent_at: ok ? new Date().toISOString() : null,
         })
         .eq('user_id', u.user_id).eq('day', day).eq('channel', 'discord');
+      settled = true;
       if (ok) sent++;
     } catch (e) {
       await db.from('notification_log')
         .update({ status: 'error', error: String(e) })
         .eq('user_id', u.user_id).eq('day', day).eq('channel', 'discord');
+      settled = true;
+    } finally {
+      if (!settled) {
+        await db.from('notification_log')
+          .update({ status: 'error', error: 'falha inesperada durante o envio' })
+          .eq('user_id', u.user_id).eq('day', day).eq('channel', 'discord');
+      }
     }
   }
 
