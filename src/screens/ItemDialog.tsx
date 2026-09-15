@@ -16,7 +16,7 @@ const DONE_OPTIONS: SegOption<Done>[] = [
 ];
 
 type FormState = Omit<WLItem, 'id'>;
-type MoneyKey = 'cost' | 'sold' | 'supply';
+type MoneyKey = 'cost' | 'sold';
 
 const toFormState = (item: Partial<WLItem>): FormState => {
   const merged = { ...EMPTY_ITEM, ...item };
@@ -45,6 +45,13 @@ export function ItemDialog({ item, isEdit, currency, onSave, onDelete, onClose }
   const onMoney = (key: MoneyKey) => (e: ChangeEvent<HTMLInputElement>) => {
     const v = e.target.value;
     setField(key, (v === '' ? null : Number(v)) as FormState[typeof key]);
+  };
+
+  // supply é integer no banco: "1.5" quebra o cast no Postgres. cost e sold
+  // são numeric — decimais neles são corretos, então ficam de fora.
+  const onSupply = (e: ChangeEvent<HTMLInputElement>) => {
+    const v = e.target.value;
+    setField('supply', (v === '' ? null : Math.trunc(Number(v))) as FormState['supply']);
   };
 
   const title = !isEdit ? 'Nova WL' : form.done === 'mintado' ? 'Registrar mint' : 'Editar WL';
@@ -172,9 +179,10 @@ export function ItemDialog({ item, isEdit, currency, onSave, onDelete, onClose }
                 id={id}
                 className="input"
                 type="number"
+                step="1"
                 placeholder="1"
                 value={form.supply ?? ''}
-                onChange={onMoney('supply')}
+                onChange={onSupply}
               />
             )}
           </Field>
