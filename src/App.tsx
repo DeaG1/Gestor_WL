@@ -17,34 +17,15 @@ import Hoje from './screens/Hoje.tsx';
 import Lista from './screens/Lista.tsx';
 import Calendario from './screens/Calendario.tsx';
 import Dashboard from './screens/dashboard/Dashboard.tsx';
+import Notificacoes from './screens/Notificacoes.tsx';
 import { makeItemActions } from './screens/actions.ts';
-import type { ItemActions, ScreenProps } from './screens/actions.ts';
+import type { ItemActions } from './screens/actions.ts';
 
 export default function App() {
   const session = useSession();
   if (session === undefined) return null;
   if (session === null) return <Login />;
   return <Shell />;
-}
-
-const PLACEHOLDER_LABELS: Record<Tab, string> = {
-  dash: 'Dashboard',
-  hoje: 'Hoje',
-  lista: 'Lista',
-  cal: 'Calendário',
-  notif: 'Notificações',
-};
-
-/**
- * Espaço reservado às cinco telas das Tasks 17–21. Elas recebem exatamente
- * `ScreenProps` — este placeholder já recebe o mesmo contrato, só não usa.
- */
-function Placeholder({ tab }: ScreenProps & { tab: Tab }) {
-  return (
-    <p style={{ fontSize: 14, color: 'var(--color-neutral-500)' }}>
-      {PLACEHOLDER_LABELS[tab]}
-    </p>
-  );
 }
 
 function Shell() {
@@ -113,7 +94,7 @@ function Shell() {
           ) : current === 'dash' ? (
             <Dashboard gestor={gestor} today={today} actions={actions} />
           ) : (
-            <Placeholder gestor={gestor} today={today} actions={actions} tab={current} />
+            <Notificacoes gestor={gestor} today={today} actions={actions} />
           )}
         </div>
       </main>
