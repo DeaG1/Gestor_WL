@@ -25,7 +25,12 @@ export const Dialog = ({
         className="dialog"
         role="dialog"
         aria-modal="true"
-        style={{ width: `min(${width}px, 100%)` }}
+        style={{
+          width: `min(${width}px, 100%)`,
+          maxHeight: '92vh',
+          overflow: 'auto',
+          gap: 'var(--space-4)',
+        }}
         onClick={(e) => e.stopPropagation()}
       >
         {children}
