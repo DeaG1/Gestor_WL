@@ -2,6 +2,7 @@ import { useMemo, useState } from 'react';
 import { nowHHMM, short, todayIso } from '@shared/date.ts';
 import { useGestor } from './data/use-gestor.ts';
 import { useNow } from './lib/use-now.ts';
+import { usePcReminder } from './lib/use-pc-reminder.ts';
 import { useSession } from './lib/use-session.ts';
 import { EMPTY_ITEM } from './lib/types.ts';
 import type { Tab, WLItem } from './lib/types.ts';
@@ -32,6 +33,7 @@ function Shell() {
   const gestor = useGestor();
   const now = useNow();
   const today = todayIso(now);
+  usePcReminder(gestor.items, gestor.settings, today, now);
 
   const [tab, setTab] = useState<Tab | null>(null);
   const current = tab ?? gestor.settings.startView;
