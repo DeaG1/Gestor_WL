@@ -3,11 +3,12 @@ import { nowHHMM, short, todayIso } from '@shared/date.ts';
 import { useGestor } from './data/use-gestor.ts';
 import { useNow } from './lib/use-now.ts';
 import { useSession } from './lib/use-session.ts';
-import { EMPTY_ITEM, WALLETS } from './lib/types.ts';
+import { EMPTY_ITEM } from './lib/types.ts';
 import type { Tab, WLItem } from './lib/types.ts';
 import { ErrorBanner } from './ui/ErrorBanner.tsx';
 import { WDOT } from './lib/tokens.ts';
 import { todayModel } from './domain/today.ts';
+import { walletCards } from './domain/wallet-cards.ts';
 import Login from './screens/Login.tsx';
 import Sidebar from './screens/Sidebar.tsx';
 import type { SidebarBadges, WalletCardView } from './screens/Sidebar.tsx';
@@ -67,18 +68,13 @@ function Shell() {
     notif: gestor.settings.discordOn || gestor.settings.pcOn ? 'on' : '',
   };
 
-  const walletCards: WalletCardView[] = WALLETS.map((w) => {
-    const items = gestor.items.filter((i) => i.wallet === w);
-    const minted = items.filter((i) => i.done === 'mintado').length;
-    const undated = items.filter((i) => !i.date).length;
-    return {
-      wallet: w,
-      dot: WDOT[w],
-      name: w,
-      sub: `${minted} mintadas · ${undated} sem data`,
-      count: items.length,
-    };
-  });
+  const walletCardViews: WalletCardView[] = walletCards(gestor.items).map((c) => ({
+    wallet: c.wallet,
+    dot: WDOT[c.wallet],
+    name: c.wallet,
+    sub: c.sub,
+    count: c.count,
+  }));
 
   const nowLabel = `${nowHHMM(now)} BRT · ${short(today)}`;
 
@@ -90,7 +86,7 @@ function Shell() {
         tab={current}
         onTab={setTab}
         badges={badges}
-        walletCards={walletCards}
+        walletCards={walletCardViews}
         nowLabel={nowLabel}
         onNew={onNew}
       />
