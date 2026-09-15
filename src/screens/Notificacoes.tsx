@@ -63,6 +63,17 @@ export default function Notificacoes({ gestor, today, actions: _actions }: Scree
   const [lastNotification, setLastNotification] = useState<LastNotification | null>(null);
   const [copyLabel, setCopyLabel] = useState('Copiar');
 
+  // Texto e horário só gravam no blur — onChange do React dispara a cada
+  // tecla, ao contrário do onChange nativo do protótipo (que só comita ao
+  // sair do campo). Sem isso, cada letra do webhook vira um round-trip de
+  // auth.getUser() + PATCH, e apagar o horário manda '' pro Postgres, que
+  // rejeita o cast pra time.
+  const [hourDraft, setHourDraft] = useState(gestor.settings.reminderHour);
+  const [webhookDraft, setWebhookDraft] = useState(gestor.settings.discordWebhook);
+
+  useEffect(() => setHourDraft(gestor.settings.reminderHour), [gestor.settings.reminderHour]);
+  useEffect(() => setWebhookDraft(gestor.settings.discordWebhook), [gestor.settings.discordWebhook]);
+
   useEffect(() => {
     let cancelled = false;
     void getLastNotification().then((n) => { if (!cancelled) setLastNotification(n); });
@@ -74,12 +85,16 @@ export default function Notificacoes({ gestor, today, actions: _actions }: Scree
   const pending = itemsOn(gestor.items, digestDay).filter((i) => i.done === 'pendente');
   const digestMsg = buildDigest(digestDay, pending, gestor.settings.currency);
 
-  const onHour = (e: ChangeEvent<HTMLInputElement>) => {
-    void gestor.setSetting('reminderHour', e.target.value);
+  const onHourChange = (e: ChangeEvent<HTMLInputElement>) => setHourDraft(e.target.value);
+  const onHourBlur = () => {
+    if (hourDraft === '' || hourDraft === gestor.settings.reminderHour) return;
+    void gestor.setSetting('reminderHour', hourDraft);
   };
 
-  const onWebhook = (e: ChangeEvent<HTMLInputElement>) => {
-    void gestor.setSetting('discordWebhook', e.target.value);
+  const onWebhookChange = (e: ChangeEvent<HTMLInputElement>) => setWebhookDraft(e.target.value);
+  const onWebhookBlur = () => {
+    if (webhookDraft === gestor.settings.discordWebhook) return;
+    void gestor.setSetting('discordWebhook', webhookDraft);
   };
 
   const onToggleDiscord = (e: ChangeEvent<HTMLInputElement>) => {
@@ -138,7 +153,14 @@ export default function Notificacoes({ gestor, today, actions: _actions }: Scree
           <div style={{ maxWidth: 200 }}>
             <Field label="Horário do lembrete (BRT)">
               {(id) => (
-                <input id={id} className="input" type="time" value={gestor.settings.reminderHour} onChange={onHour} />
+                <input
+                  id={id}
+                  className="input"
+                  type="time"
+                  value={hourDraft}
+                  onChange={onHourChange}
+                  onBlur={onHourBlur}
+                />
               )}
             </Field>
           </div>
@@ -158,8 +180,9 @@ export default function Notificacoes({ gestor, today, actions: _actions }: Scree
                   id={id}
                   className="input"
                   placeholder="https://discord.com/api/webhooks/…"
-                  value={gestor.settings.discordWebhook}
-                  onChange={onWebhook}
+                  value={webhookDraft}
+                  onChange={onWebhookChange}
+                  onBlur={onWebhookBlur}
                 />
               )}
             </Field>
