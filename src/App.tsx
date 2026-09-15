@@ -16,6 +16,7 @@ import { ItemDialog } from './screens/ItemDialog.tsx';
 import Hoje from './screens/Hoje.tsx';
 import Lista from './screens/Lista.tsx';
 import Calendario from './screens/Calendario.tsx';
+import Dashboard from './screens/dashboard/Dashboard.tsx';
 import { makeItemActions } from './screens/actions.ts';
 import type { ItemActions, ScreenProps } from './screens/actions.ts';
 
@@ -109,6 +110,8 @@ function Shell() {
             <Lista gestor={gestor} today={today} actions={actions} />
           ) : current === 'cal' ? (
             <Calendario gestor={gestor} today={today} actions={actions} />
+          ) : current === 'dash' ? (
+            <Dashboard gestor={gestor} today={today} actions={actions} />
           ) : (
             <Placeholder gestor={gestor} today={today} actions={actions} tab={current} />
           )}
