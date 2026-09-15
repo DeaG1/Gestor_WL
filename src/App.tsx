@@ -14,6 +14,7 @@ import Sidebar from './screens/Sidebar.tsx';
 import type { SidebarBadges, WalletCardView } from './screens/Sidebar.tsx';
 import { ItemDialog } from './screens/ItemDialog.tsx';
 import Hoje from './screens/Hoje.tsx';
+import Lista from './screens/Lista.tsx';
 import { makeItemActions } from './screens/actions.ts';
 import type { ItemActions, ScreenProps } from './screens/actions.ts';
 
@@ -103,6 +104,8 @@ function Shell() {
             </button>
           ) : current === 'hoje' ? (
             <Hoje gestor={gestor} today={today} actions={actions} />
+          ) : current === 'lista' ? (
+            <Lista gestor={gestor} today={today} actions={actions} />
           ) : (
             <Placeholder gestor={gestor} today={today} actions={actions} tab={current} />
           )}
