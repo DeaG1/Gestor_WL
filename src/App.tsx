@@ -12,6 +12,7 @@ import { walletCards } from './domain/wallet-cards.ts';
 import Login from './screens/Login.tsx';
 import Sidebar from './screens/Sidebar.tsx';
 import type { SidebarBadges, WalletCardView } from './screens/Sidebar.tsx';
+import { ItemDialog } from './screens/ItemDialog.tsx';
 import { makeItemActions } from './screens/actions.ts';
 import type { ItemActions, ScreenProps } from './screens/actions.ts';
 
@@ -104,7 +105,23 @@ function Shell() {
           )}
         </div>
       </main>
-      {form && null /* Task 16 monta o dialog do item aqui, usando `form`/`setForm`. */}
+      {form && (
+        <ItemDialog
+          item={form.item}
+          isEdit={form.isEdit}
+          currency={gestor.settings.currency}
+          onSave={(patch) => {
+            if (form.isEdit && form.item.id) void gestor.saveItem(form.item.id, patch);
+            else void gestor.addItem(patch);
+            setForm(null);
+          }}
+          onDelete={() => {
+            if (form.item.id) void gestor.removeItem(form.item.id);
+            setForm(null);
+          }}
+          onClose={() => setForm(null)}
+        />
+      )}
     </div>
   );
 }
