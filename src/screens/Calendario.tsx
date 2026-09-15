@@ -72,7 +72,7 @@ export default function Calendario({ gestor, today, actions }: ScreenProps) {
                     boxShadow: d.isToday ? 'inset 0 0 0 1px var(--color-accent)' : 'var(--shadow-sm)',
                   }}
                 >
-                  <div style={{ fontSize: 12, fontWeight: 500, color: d.isToday ? 'var(--color-accent)' : undefined, marginBottom: 6 }}>
+                  <div style={{ fontSize: 12, fontWeight: 500, color: d.numColor, marginBottom: 6 }}>
                     {d.num}
                   </div>
                   <div style={{ display: 'flex', flexDirection: 'column', gap: 3 }}>

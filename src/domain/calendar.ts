@@ -7,6 +7,8 @@ export interface CalDay {
   day: string;
   inMonth: boolean;
   isToday: boolean;
+  /** Cor do número do dia: accent hoje, neutral-400 nos demais. */
+  numColor: string;
   items: WLItem[];
 }
 
@@ -32,11 +34,13 @@ export const calendarWeeks = (
     for (let k = 0; k < 7; k++) {
       const d = new Date(start.getFullYear(), start.getMonth(), start.getDate() + w * 7 + k);
       const day = iso(d);
+      const isToday = day === today;
       days.push({
         num: d.getDate(),
         day,
         inMonth: d.getMonth() === month,
-        isToday: day === today,
+        isToday,
+        numColor: isToday ? 'var(--color-accent)' : 'var(--color-neutral-400)',
         items: itemsOn(items, day),
       });
     }

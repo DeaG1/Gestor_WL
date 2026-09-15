@@ -44,6 +44,15 @@ describe('calendarWeeks', () => {
     expect(todays.map((d) => d.day)).toEqual(['2026-09-13']);
   });
 
+  it('colore o número do dia: accent hoje, neutral-400 nos demais', () => {
+    const weeks = calendarWeeks([], 2026, 8, '2026-09-13');
+    const days = weeks.flatMap((w) => w.days);
+    const today = days.find((d) => d.day === '2026-09-13')!;
+    const other = days.find((d) => d.day === '2026-09-14')!;
+    expect(today.numColor).toBe('var(--color-accent)');
+    expect(other.numColor).toBe('var(--color-neutral-400)');
+  });
+
   it('pendura os mints no dia certo, ordenados por horário', () => {
     const items = [
       make({ name: 'Tarde', date: '2026-09-15', time: '15:00' }),
