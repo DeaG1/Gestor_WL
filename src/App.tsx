@@ -13,6 +13,7 @@ import Login from './screens/Login.tsx';
 import Sidebar from './screens/Sidebar.tsx';
 import type { SidebarBadges, WalletCardView } from './screens/Sidebar.tsx';
 import { ItemDialog } from './screens/ItemDialog.tsx';
+import Hoje from './screens/Hoje.tsx';
 import { makeItemActions } from './screens/actions.ts';
 import type { ItemActions, ScreenProps } from './screens/actions.ts';
 
@@ -100,6 +101,8 @@ function Shell() {
             <button className="btn btn-secondary" onClick={() => void gestor.reload()}>
               Tentar de novo
             </button>
+          ) : current === 'hoje' ? (
+            <Hoje gestor={gestor} today={today} actions={actions} />
           ) : (
             <Placeholder gestor={gestor} today={today} actions={actions} tab={current} />
           )}

@@ -57,3 +57,12 @@ input[type=time]::-webkit-calendar-picker-indicator { filter: invert(0.8); }
   background: var(--color-surface); color: var(--color-accent-200);
   box-shadow: inset 2px 0 0 var(--color-accent);
 }
+
+/* — undated chips (Hoje) — */
+.wl-chip {
+  display: inline-flex; align-items: center; gap: 8px;
+  background: var(--color-surface); border: 1px solid transparent;
+  color: var(--color-text); font: inherit; font-size: 13px;
+  padding: 6px 12px; border-radius: var(--radius-md); cursor: pointer;
+}
+.wl-chip:hover { border-color: var(--color-accent); }
