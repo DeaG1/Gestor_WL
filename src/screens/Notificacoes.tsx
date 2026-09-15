@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import type { ChangeEvent } from 'react';
+import { FunctionsHttpError } from '@supabase/supabase-js';
 import { nowHHMM, short } from '@shared/date.ts';
 import { buildDigest } from '@shared/digest.ts';
 import { itemsOn, todayModel } from '../domain/today.ts';
@@ -27,6 +28,26 @@ const lastNoteText = (n: LastNotification | null, today: string): string => {
   if (n.status === 'sending') return `último envio: ${when} · enviando…`;
   if (n.error) return `último envio: ${when} · falhou — ${n.error}`;
   return `último envio: ${when} · falhou`;
+};
+
+/**
+ * supabase.functions.invoke não lança em status não-2xx: devolve
+ * `{ data: null, error }` e descarta o corpo, que é exatamente onde a
+ * Edge Function manda a mensagem específica ("Cole o webhook primeiro.",
+ * "sem sessão"). error.context é a Response ainda não lida — lê o JSON de
+ * lá; se não der, cai para o status HTTP puro.
+ */
+const errorDetail = async (error: unknown): Promise<string | number> => {
+  if (error instanceof FunctionsHttpError) {
+    try {
+      const body = await error.context.json();
+      if (body?.status) return body.status as string;
+    } catch {
+      // corpo não era JSON — segue com o status HTTP
+    }
+    return error.context.status as number;
+  }
+  return 'erro';
 };
 
 const pcStatusText = (): string => {
@@ -76,7 +97,11 @@ export default function Notificacoes({ gestor, today, actions: _actions }: Scree
   const onSendDiscord = async () => {
     setSendStatus('Enviando…');
     try {
-      const { data } = await supabase.functions.invoke('daily-digest', { body: { mode: 'test' } });
+      const { data, error } = await supabase.functions.invoke('daily-digest', { body: { mode: 'test' } });
+      if (error) {
+        setSendStatus(`Falhou (${await errorDetail(error)}).`);
+        return;
+      }
       setSendStatus(data?.ok ? 'Enviado.' : `Falhou (${data?.status ?? 'erro'}).`);
     } catch {
       setSendStatus('Falhou (erro).');
