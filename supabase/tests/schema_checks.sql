@@ -75,10 +75,14 @@ begin
     'Trigger on_auth_user_created deve estar em auth.users com handle_new_user como security definer';
 
   assert exists (
-    select 1 from pg_proc
-    where proname = 'handle_new_user'
-      and proconfig is not null
-      and array_to_string(proconfig, ',') like '%search_path%'),
+    select 1 from pg_trigger t
+    join pg_proc p on t.tgfoid = p.oid
+    where t.tgname = 'on_auth_user_created'
+      and t.tgrelid = 'auth.users'::regclass
+      and p.proname = 'handle_new_user'
+      and p.pronamespace = 'public'::regnamespace
+      and p.proconfig is not null
+      and array_to_string(p.proconfig, ',') like '%search_path%'),
     'handle_new_user precisa ter search_path fixo no proconfig';
 
   -- Verificação de nulabilidade: sold é nulável

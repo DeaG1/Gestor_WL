@@ -7,6 +7,8 @@ with me as (
   select id from auth.users where email = 'romulodoprado@gmail.com'
 ), y as (
   select extract(year from current_date)::int as yr
+-- dt está em MM-DD, invertido em relação ao DD/MM do handoff, para bater com
+-- make_date(ano, mês, dia) logo abaixo — ver "Cuidados conhecidos" no README.
 ), v(name, wallet, type, chain, dt, tm, status, notes) as (values
   ('Remilia: Civil War', 'Blowfly', 'FCFS',        'RH',  '09-08', '05:20', 'Confirmado', '4h20 EST'),
   ('ubk',                'Blowfly', 'FCFS',        'RH',  '',      '',      'TBH',        ''),

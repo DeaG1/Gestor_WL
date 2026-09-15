@@ -171,6 +171,13 @@ variável nenhuma, então o placeholder precisa estar trocado antes de rodar:
 
    Espera-se o job ativo e as execuções recentes com `succeeded`.
 
+5. Depois do primeiro login, desligue novos cadastros em **Authentication →
+   Sign In / Providers → Allow new users to sign up** no painel do projeto
+   hospedado: `signInWithOtp` cria conta por padrão (`shouldCreateUser:
+   true`), então qualquer pessoa que achar a URL pública poderia criar uma
+   conta na cota gratuita do projeto — a RLS garante que ela não veria
+   nada, mas a cota continua aberta.
+
 ## Documentação de referência
 
 - Spec do projeto: `docs/superpowers/specs/2026-09-13-gestor-wl-design.md`
