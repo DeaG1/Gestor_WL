@@ -1,20 +1,27 @@
 import type { Status, WLType } from './types.ts';
 
+// Loculus não vem do handoff: foi acrescentada depois. Matiz 340 (rosa/magenta)
+// porque é a mais distante das outras duas wallets — ~90° do azul da MEGA e
+// ~105° do amarelo da Blowfly —, e no calendário a cor é a única pista de qual
+// wallet é qual. Luminosidade e croma seguem o padrão das outras duas.
 export const WDOT: Record<string, string> = {
   Blowfly: 'oklch(0.82 0.15 88)',
   MEGA: 'oklch(0.72 0.14 250)',
+  Loculus: 'oklch(0.76 0.14 340)',
 };
 
 /** [fundo, texto] da tag de wallet. */
 export const WTAG: Record<string, [string, string]> = {
   Blowfly: ['oklch(0.42 0.09 85)', 'oklch(0.93 0.12 90)'],
   MEGA: ['oklch(0.42 0.1 250)', 'oklch(0.92 0.07 250)'],
+  Loculus: ['oklch(0.42 0.10 340)', 'oklch(0.92 0.07 340)'],
 };
 
 /** Fundo do bloco de mint no calendário. */
 export const WCAL: Record<string, string> = {
   Blowfly: 'oklch(0.36 0.07 85)',
   MEGA: 'oklch(0.36 0.08 250)',
+  Loculus: 'oklch(0.36 0.08 340)',
 };
 
 /** [fundo, texto] da tag de status. */

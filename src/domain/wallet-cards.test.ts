@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { walletCards } from './wallet-cards.ts';
+import { walletCards, walletNames } from './wallet-cards.ts';
 import type { WLItem } from '../lib/types.ts';
 
 const make = (over: Partial<WLItem>): WLItem => ({
@@ -9,8 +9,14 @@ const make = (over: Partial<WLItem>): WLItem => ({
 });
 
 describe('walletCards', () => {
-  it('devolve sempre as duas wallets, na ordem', () => {
-    expect(walletCards([]).map((c) => c.wallet)).toEqual(['Blowfly', 'MEGA']);
+  it('devolve sempre todas as wallets, na ordem', () => {
+    expect(walletCards([]).map((c) => c.wallet)).toEqual(['Blowfly', 'MEGA', 'Loculus']);
+  });
+
+  it('conta a Loculus no terceiro card', () => {
+    const cards = walletCards([make({ wallet: 'Loculus', done: 'mintado' }), make({ wallet: 'Loculus' })]);
+    expect(cards[2].count).toBe(2);
+    expect(cards[2].minted).toBe(1);
   });
 
   it('conta o total e as mintadas de cada wallet', () => {
@@ -32,6 +38,12 @@ describe('walletCards', () => {
       make({ wallet: 'Blowfly', date: '2026-09-15' }),            // não conta
     ]);
     expect(cards[0].undated).toBe(1);
+  });
+
+  it('junta os nomes das wallets no formato da marca', () => {
+    expect(walletNames(['Blowfly', 'MEGA'])).toBe('Blowfly & MEGA');
+    expect(walletNames()).toBe('Blowfly, MEGA & Loculus');
+    expect(walletNames(['Blowfly'])).toBe('Blowfly');
   });
 
   it('monta o subtítulo do card', () => {

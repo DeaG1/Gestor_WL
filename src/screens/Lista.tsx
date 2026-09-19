@@ -4,12 +4,12 @@ import { ArrowRight, ArrowSquareOut, Check, PencilSimple } from '@phosphor-icons
 import { filterItems, listSummary } from '../domain/list.ts';
 import { itemView } from '../domain/item-view.ts';
 import type { ScreenProps } from './actions.ts';
-import { DEFAULT_FILTERS } from '../lib/types.ts';
+import { DEFAULT_FILTERS, WALLETS } from '../lib/types.ts';
 import type { Filters } from '../lib/types.ts';
 import { Seg } from '../ui/Seg.tsx';
 import { Tag } from '../ui/Tag.tsx';
 
-const WALLET_OPTIONS: Filters['wallet'][] = ['Todas', 'Blowfly', 'MEGA'];
+const WALLET_OPTIONS: Filters['wallet'][] = ['Todas', ...WALLETS];
 const TYPE_OPTIONS: Filters['type'][] = ['Todos', 'FCFS', 'GTD', 'GTD + FCFS'];
 const CHAIN_OPTIONS: Filters['chain'][] = ['Todas', 'RH', 'ARC'];
 const DONE_OPTIONS: Filters['done'][] = ['Pendentes', 'Mintados', 'Pulados', 'Tudo'];

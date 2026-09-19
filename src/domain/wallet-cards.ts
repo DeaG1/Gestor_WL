@@ -8,7 +8,17 @@ export interface WalletCard {
   sub: string;
 }
 
-/** Os dois mini-cards do rodapé da sidebar, um por wallet. */
+/** "Blowfly, MEGA & Loculus" — os nomes no formato do subtítulo da marca. */
+export const walletNames = (wallets: readonly string[] = WALLETS): string =>
+  wallets.length <= 1
+    ? wallets.join('')
+    : `${wallets.slice(0, -1).join(', ')} & ${wallets[wallets.length - 1]}`;
+
+/** "3 Blowfly · 2 MEGA · 0 Loculus" — contagem por wallet, na ordem de WALLETS. */
+export const walletCountsLabel = (items: WLItem[]): string =>
+  WALLETS.map((w) => `${items.filter((i) => i.wallet === w).length} ${w}`).join(' · ');
+
+/** Os mini-cards do rodapé da sidebar, um por wallet. */
 export const walletCards = (items: WLItem[]): WalletCard[] =>
   WALLETS.map((wallet) => {
     const list = items.filter((i) => i.wallet === wallet);

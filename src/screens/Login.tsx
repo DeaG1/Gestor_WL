@@ -1,6 +1,7 @@
 import { useState, type FormEvent } from 'react';
 import { supabase } from '../lib/supabase.ts';
 import { Field } from '../ui/Field.tsx';
+import { walletNames } from '../domain/wallet-cards.ts';
 
 type Status = 'idle' | 'sending' | 'sent';
 
@@ -36,7 +37,7 @@ export default function Login() {
             Gestor WL
           </div>
           <div style={{ fontSize: 12, color: 'var(--color-neutral-500)', marginTop: 2 }}>
-            FCFS · GTD · Blowfly & MEGA
+            FCFS · GTD · {walletNames()}
           </div>
         </div>
 

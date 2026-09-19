@@ -1,4 +1,5 @@
 import type { Filters, WLItem } from '../lib/types.ts';
+import { walletCountsLabel } from './wallet-cards.ts';
 
 const matchesDone = (item: WLItem, done: Filters['done']): boolean => {
   if (done === 'Tudo') return true;
@@ -23,8 +24,5 @@ export const filterItems = (items: WLItem[], f: Filters): WLItem[] => {
       a.name.localeCompare(b.name));
 };
 
-export const listSummary = (shown: number, items: WLItem[]): string => {
-  const blowfly = items.filter((i) => i.wallet === 'Blowfly').length;
-  const mega = items.filter((i) => i.wallet === 'MEGA').length;
-  return `${shown} de ${items.length} WL · ${blowfly} Blowfly · ${mega} MEGA`;
-};
+export const listSummary = (shown: number, items: WLItem[]): string =>
+  `${shown} de ${items.length} WL · ${walletCountsLabel(items)}`;

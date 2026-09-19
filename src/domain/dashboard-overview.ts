@@ -2,6 +2,7 @@ import { short } from '@shared/date.ts';
 import { money, num } from '@shared/money.ts';
 import { NEG, POS, TYPE_COLORS, TYPE_KEYS, type TypeKey } from '../lib/tokens.ts';
 import { WALLETS, type DashScope, type Wallet, type WLItem } from '../lib/types.ts';
+import { walletCountsLabel } from './wallet-cards.ts';
 
 export interface Kpi {
   label: string;
@@ -69,7 +70,7 @@ export const overviewModel = (
     {
       label: 'WL totais',
       value: String(scoped.length),
-      sub: `${byWallet('Blowfly').length} Blowfly · ${byWallet('MEGA').length} MEGA`,
+      sub: walletCountsLabel(items),
       color: 'var(--color-text)',
     },
     {
@@ -160,7 +161,7 @@ export const overviewModel = (
 
   return {
     summary:
-      `${items.length} WL em 2 wallets · ` +
+      `${items.length} WL em ${WALLETS.length} wallets · ` +
       `${items.filter((i) => i.done === 'mintado').length} mintadas · ` +
       `${undatedAll} ainda sem data`,
     kpis,

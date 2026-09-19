@@ -71,6 +71,11 @@ describe('filterItems — ordenação', () => {
 describe('listSummary', () => {
   it('conta o que está à vista e o total por wallet', () => {
     const items = [make({ wallet: 'Blowfly' }), make({ wallet: 'Blowfly' }), make({ wallet: 'MEGA' })];
-    expect(listSummary(2, items)).toBe('2 de 3 WL · 2 Blowfly · 1 MEGA');
+    expect(listSummary(2, items)).toBe('2 de 3 WL · 2 Blowfly · 1 MEGA · 0 Loculus');
+  });
+
+  it('conta a Loculus no resumo', () => {
+    const items = [make({ wallet: 'MEGA' }), make({ wallet: 'Loculus' }), make({ wallet: 'Loculus' })];
+    expect(listSummary(3, items)).toBe('3 de 3 WL · 0 Blowfly · 1 MEGA · 2 Loculus');
   });
 });

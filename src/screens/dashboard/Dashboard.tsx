@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { overviewModel } from '../../domain/dashboard-overview.ts';
 import { financeModel } from '../../domain/dashboard-finance.ts';
 import type { ScreenProps } from '../actions.ts';
-import type { DashScope } from '../../lib/types.ts';
+import { WALLETS, type DashScope } from '../../lib/types.ts';
 import { Seg } from '../../ui/Seg.tsx';
 import Kpis from './Kpis.tsx';
 import WalletBars from './WalletBars.tsx';
@@ -12,7 +12,7 @@ import ProfitLine from './ProfitLine.tsx';
 import WalletPnl from './WalletPnl.tsx';
 import MintedTable from './MintedTable.tsx';
 
-const SCOPE_OPTIONS: DashScope[] = ['Tudo', 'Blowfly', 'MEGA'];
+const SCOPE_OPTIONS: DashScope[] = ['Tudo', ...WALLETS];
 
 export default function Dashboard({ gestor, today, actions }: ScreenProps) {
   const [scope, setScope] = useState<DashScope>('Tudo');

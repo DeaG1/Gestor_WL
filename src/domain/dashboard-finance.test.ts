@@ -51,9 +51,9 @@ describe('financeModel — resultado por wallet', () => {
     make({ wallet: 'MEGA', done: 'mintado', date: '2026-09-11', cost: 2, sold: 1 }),
   ];
 
-  it('mostra as duas wallets mesmo com o escopo filtrado', () => {
+  it('mostra todas as wallets mesmo com o escopo filtrado', () => {
     expect(financeModel(items, 'MEGA', '$').walletPnl.map((w) => w.name))
-      .toEqual(['Blowfly', 'MEGA']);
+      .toEqual(['Blowfly', 'MEGA', 'Loculus']);
   });
 
   it('soma por wallet e descreve o ROI', () => {

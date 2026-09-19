@@ -22,7 +22,7 @@ describe('overviewModel — resumo e KPIs', () => {
   it('resume sempre o conjunto inteiro, ignorando o escopo', () => {
     const m = overviewModel(items, TODAY, 'Blowfly', '$');
     // Sem data e ainda pendente é só o C: o D não tem data, mas está pulado.
-    expect(m.summary).toBe('5 WL em 2 wallets · 1 mintadas · 1 ainda sem data');
+    expect(m.summary).toBe('5 WL em 3 wallets · 1 mintadas · 1 ainda sem data');
   });
 
   it('conta as WL do escopo', () => {
@@ -30,8 +30,15 @@ describe('overviewModel — resumo e KPIs', () => {
     expect(overviewModel(items, TODAY, 'MEGA', '$').kpis[0].value).toBe('2');
   });
 
-  it('mantém o sub do primeiro KPI sobre as duas wallets', () => {
-    expect(overviewModel(items, TODAY, 'MEGA', '$').kpis[0].sub).toBe('3 Blowfly · 2 MEGA');
+  it('mantém o sub do primeiro KPI sobre todas as wallets', () => {
+    expect(overviewModel(items, TODAY, 'MEGA', '$').kpis[0].sub).toBe('3 Blowfly · 2 MEGA · 0 Loculus');
+  });
+
+  it('conta a Loculus no resumo e no sub do primeiro KPI', () => {
+    const comLoculus = [...items, make({ name: 'L', wallet: 'Loculus' })];
+    const m = overviewModel(comLoculus, TODAY, 'Tudo', '$');
+    expect(m.summary.startsWith('6 WL em 3 wallets')).toBe(true);
+    expect(m.kpis[0].sub).toBe('3 Blowfly · 2 MEGA · 1 Loculus');
   });
 
   it('conta mintadas, puladas e agendadas', () => {
@@ -62,9 +69,9 @@ describe('overviewModel — resumo e KPIs', () => {
 });
 
 describe('overviewModel — barras por wallet e donut', () => {
-  it('mostra as duas wallets quando o escopo é Tudo, e só uma quando filtrado', () => {
+  it('mostra todas as wallets quando o escopo é Tudo, e só uma quando filtrado', () => {
     expect(overviewModel(items, TODAY, 'Tudo', '$').walletBars.map((b) => b.name))
-      .toEqual(['Blowfly', 'MEGA']);
+      .toEqual(['Blowfly', 'MEGA', 'Loculus']);
     expect(overviewModel(items, TODAY, 'MEGA', '$').walletBars.map((b) => b.name)).toEqual(['MEGA']);
   });
 

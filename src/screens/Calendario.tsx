@@ -5,6 +5,7 @@ import { calendarWeeks, monthTitle } from '../domain/calendar.ts';
 import { itemView } from '../domain/item-view.ts';
 import type { ScreenProps } from './actions.ts';
 import { WTAG } from '../lib/tokens.ts';
+import { WALLETS } from '../lib/types.ts';
 
 interface CalMonth {
   y: number;
@@ -105,14 +106,12 @@ export default function Calendario({ gestor, today, actions }: ScreenProps) {
       </div>
 
       <div style={{ display: 'flex', gap: 'var(--space-6)', fontSize: 12, color: 'var(--color-neutral-400)' }}>
-        <span style={{ display: 'inline-flex', alignItems: 'center', gap: 6 }}>
-          <span style={{ width: 10, height: 10, borderRadius: 3, background: WTAG.Blowfly[0] }} />
-          Blowfly
-        </span>
-        <span style={{ display: 'inline-flex', alignItems: 'center', gap: 6 }}>
-          <span style={{ width: 10, height: 10, borderRadius: 3, background: WTAG.MEGA[0] }} />
-          MEGA
-        </span>
+        {WALLETS.map((w) => (
+          <span key={w} style={{ display: 'inline-flex', alignItems: 'center', gap: 6 }}>
+            <span style={{ width: 10, height: 10, borderRadius: 3, background: WTAG[w][0] }} />
+            {w}
+          </span>
+        ))}
       </div>
     </div>
   );

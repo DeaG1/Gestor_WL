@@ -1,4 +1,4 @@
-export type Wallet = 'Blowfly' | 'MEGA';
+export type Wallet = 'Blowfly' | 'MEGA' | 'Loculus';
 export type WLType = 'FCFS' | 'GTD' | 'GTD + FCFS' | '';
 export type Chain = 'RH' | 'ARC' | '';
 export type Status = 'Confirmado' | 'TBH' | 'TBA';
@@ -44,7 +44,7 @@ export interface Filters {
   done: 'Pendentes' | 'Mintados' | 'Pulados' | 'Tudo';
 }
 
-export const WALLETS: Wallet[] = ['Blowfly', 'MEGA'];
+export const WALLETS: Wallet[] = ['Blowfly', 'MEGA', 'Loculus'];
 export const TYPES: Exclude<WLType, ''>[] = ['FCFS', 'GTD', 'GTD + FCFS'];
 export const CHAINS: Exclude<Chain, ''>[] = ['RH', 'ARC'];
 export const STATUSES: Status[] = ['Confirmado', 'TBH', 'TBA'];

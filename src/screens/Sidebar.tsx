@@ -1,4 +1,5 @@
 import type { Tab, Wallet } from '../lib/types.ts';
+import { walletNames } from '../domain/wallet-cards.ts';
 
 export interface SidebarBadges {
   hoje: string;
@@ -59,7 +60,7 @@ export default function Sidebar({ tab, onTab, badges, walletCards, nowLabel, onN
           Gestor WL
         </div>
         <div style={{ fontSize: 12, color: 'var(--color-neutral-500)', marginTop: 2 }}>
-          FCFS · GTD · Blowfly & MEGA
+          FCFS · GTD · {walletNames()}
         </div>
       </div>
 
