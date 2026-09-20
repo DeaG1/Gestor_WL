@@ -61,9 +61,13 @@ export const STATUS_LABELS: Record<Status, string> = {
   TBA: 'Sem data',
 };
 
+// Nasce sem data e, por isso, com status 'TBA' ("Sem data"): e o estado real
+// de uma WL recem-ganha, cuja data de mint ainda nao foi anunciada. Quando a
+// data sair, o status vira 'TBH' ("Sem horário"); com data e hora, o proprio
+// modal forca 'Confirmado' ao salvar.
 export const EMPTY_ITEM: Omit<WLItem, 'id'> = {
   name: '', wallet: 'Blowfly', type: 'FCFS', chain: 'RH', date: '', time: '',
-  status: 'TBH', cost: null, sold: null, supply: null, link: '', notes: '', done: 'pendente',
+  status: 'TBA', cost: null, sold: null, supply: null, link: '', notes: '', done: 'pendente',
 };
 
 export const DEFAULT_FILTERS: Filters = {

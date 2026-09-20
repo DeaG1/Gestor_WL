@@ -23,6 +23,12 @@ const setup = (over: Partial<Parameters<typeof ItemDialog>[0]> = {}) => {
 };
 
 describe('ItemDialog', () => {
+  it('abre a WL nova sem data e com status "Sem data"', () => {
+    setup();
+    expect(screen.getByLabelText('Data')).toHaveValue('');
+    expect(screen.getByRole('radio', { name: 'Sem data' })).toBeChecked();
+  });
+
   it('não salva sem nome', async () => {
     const { onSave } = setup();
     await userEvent.click(screen.getByRole('button', { name: 'Cadastrar' }));
