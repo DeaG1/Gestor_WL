@@ -4,7 +4,7 @@ import { Dialog } from '../ui/Dialog.tsx';
 import { Field } from '../ui/Field.tsx';
 import { Seg } from '../ui/Seg.tsx';
 import type { SegOption } from '../ui/Seg.tsx';
-import { CHAINS, EMPTY_ITEM, STATUSES, TYPES, WALLETS } from '../lib/types.ts';
+import { CHAINS, EMPTY_ITEM, STATUSES, STATUS_LABELS, TYPES, WALLETS } from '../lib/types.ts';
 import type { Done, WLItem } from '../lib/types.ts';
 import { money, num } from '@shared/money.ts';
 import { NEG, POS } from '../lib/tokens.ts';
@@ -131,7 +131,9 @@ export function ItemDialog({ item, isEdit, currency, onSave, onDelete, onClose }
         </div>
       </div>
 
-      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1.4fr', gap: 'var(--space-4)' }}>
+      {/* Status ganhou mais espaco: os rotulos por extenso ("Sem horário")
+          sao bem mais largos que as siglas que ficavam aqui antes. */}
+      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 2fr', gap: 'var(--space-4)' }}>
         <Field label="Data">
           {(id) => (
             <input id={id} className="input" type="date" value={form.date} onChange={onText('date')} />
@@ -145,7 +147,12 @@ export function ItemDialog({ item, isEdit, currency, onSave, onDelete, onClose }
         <div style={{ minWidth: 0 }}>
           <Field label="Status">
             {(id) => (
-              <Seg name={id} value={form.status} options={STATUSES} stretch paddingInline={8}
+              <Seg
+                name={id}
+                value={form.status}
+                options={STATUSES.map((s) => ({ label: STATUS_LABELS[s], value: s }))}
+                stretch
+                paddingInline={6}
                 onChange={(v) => setField('status', v)}
               />
             )}

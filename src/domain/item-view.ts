@@ -1,7 +1,7 @@
 import { short } from '@shared/date.ts';
 import { money, num } from '@shared/money.ts';
 import { NEG, POS, STAG, WCAL, WDOT, WTAG } from '../lib/tokens.ts';
-import type { WLItem } from '../lib/types.ts';
+import { STATUS_LABELS, type WLItem } from '../lib/types.ts';
 
 export interface ItemView {
   item: WLItem;
@@ -43,8 +43,11 @@ export const itemView = (item: WLItem, currency: string): ItemView => {
   const sold = num(item.sold);
   const profit = sold - cost;
 
-  const statusLabel = isDone ? (isMinted ? 'Mintado' : 'Pulado') : item.status;
-  const [statusBg, statusFg] = STAG[statusLabel] ?? STAG.TBA;
+  // A chave escolhe a cor e vem do valor guardado; o rótulo é o texto exibido.
+  // Separados de proposito: STAG nao conhece 'Sem horário'.
+  const statusKey = isDone ? (isMinted ? 'Mintado' : 'Pulado') : item.status;
+  const statusLabel = isDone ? statusKey : STATUS_LABELS[item.status];
+  const [statusBg, statusFg] = STAG[statusKey] ?? STAG.TBA;
   const [walletBg, walletFg] = WTAG[item.wallet] ?? WTAG.MEGA;
 
   return {

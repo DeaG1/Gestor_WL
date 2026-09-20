@@ -67,8 +67,20 @@ describe('itemView — dinheiro', () => {
 });
 
 describe('itemView — status e estado', () => {
-  it('usa o status do item enquanto ele é pendente', () => {
-    expect(itemView(make({ status: 'TBH' }), '$').statusLabel).toBe('TBH');
+  it('mostra o status do item por extenso enquanto ele é pendente', () => {
+    expect(itemView(make({ status: 'TBH' }), '$').statusLabel).toBe('Sem horário');
+    expect(itemView(make({ status: 'TBA' }), '$').statusLabel).toBe('Sem data');
+    expect(itemView(make({ status: 'Confirmado' }), '$').statusLabel).toBe('Confirmado');
+  });
+
+  it('escolhe a cor pelo status guardado, não pelo texto exibido', () => {
+    // O banco guarda TBH/TBA; se a cor fosse buscada pelo rótulo traduzido,
+    // cairia no fallback e os dois status ficariam da mesma cor.
+    const tbh = itemView(make({ status: 'TBH' }), '$');
+    const tba = itemView(make({ status: 'TBA' }), '$');
+    expect(tbh.statusBg).toBe('oklch(0.42 0.10 55)');
+    expect(tba.statusBg).toBe('var(--color-neutral-800)');
+    expect(tbh.statusBg).not.toBe(tba.statusBg);
   });
 
   it('troca o status por Mintado e risca o nome', () => {

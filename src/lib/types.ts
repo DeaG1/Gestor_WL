@@ -49,6 +49,18 @@ export const TYPES: Exclude<WLType, ''>[] = ['FCFS', 'GTD', 'GTD + FCFS'];
 export const CHAINS: Exclude<Chain, ''>[] = ['RH', 'ARC'];
 export const STATUSES: Status[] = ['Confirmado', 'TBH', 'TBA'];
 
+/**
+ * Como cada status aparece na tela. O banco continua guardando 'TBH' e 'TBA'
+ * — a tradução é só de exibição, então nenhuma WL precisou ser alterada.
+ * Atenção: as cores de status são escolhidas pelo valor guardado, nunca por
+ * este rótulo.
+ */
+export const STATUS_LABELS: Record<Status, string> = {
+  Confirmado: 'Confirmado',
+  TBH: 'Sem horário',
+  TBA: 'Sem data',
+};
+
 export const EMPTY_ITEM: Omit<WLItem, 'id'> = {
   name: '', wallet: 'Blowfly', type: 'FCFS', chain: 'RH', date: '', time: '',
   status: 'TBH', cost: null, sold: null, supply: null, link: '', notes: '', done: 'pendente',
