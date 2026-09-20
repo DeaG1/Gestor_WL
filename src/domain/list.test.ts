@@ -31,6 +31,18 @@ describe('filterItems — busca e filtros', () => {
     expect(filterItems(items, f({ chain: 'ARC' })).map((i) => i.name)).toEqual(['Arcana']);
   });
 
+  it('filtra pelas redes acrescentadas depois', () => {
+    const redes = [
+      make({ name: 'Na Solana', chain: 'SOLANA' }),
+      make({ name: 'Na Base', chain: 'BASE' }),
+      make({ name: 'Na Zec', chain: 'ZEC' }),
+      make({ name: 'Na BNB', chain: 'BNB' }),
+    ];
+    expect(filterItems(redes, f({ chain: 'SOLANA' })).map((i) => i.name)).toEqual(['Na Solana']);
+    expect(filterItems(redes, f({ chain: 'BNB' })).map((i) => i.name)).toEqual(['Na BNB']);
+    expect(filterItems(redes, f({ chain: 'Todas' })).length).toBe(4);
+  });
+
   it('o filtro GTD casa também com "GTD + FCFS"', () => {
     expect(filterItems(items, f({ type: 'GTD' })).map((i) => i.name)).toEqual(['Akai', 'Misfits']);
   });

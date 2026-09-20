@@ -1,6 +1,9 @@
 export type Wallet = 'Blowfly' | 'MEGA' | 'Loculus';
 export type WLType = 'FCFS' | 'GTD' | 'GTD + FCFS' | '';
-export type Chain = 'RH' | 'ARC' | '';
+// Para acrescentar uma rede: o nome aqui, o mesmo nome em CHAINS, e uma
+// migration recriando wl_items_chain_check com ele. Nada mais — o filtro da
+// Lista e o campo do modal saem de CHAINS.
+export type Chain = 'RH' | 'ARC' | 'ZEC' | 'BNB' | 'SOLANA' | 'BASE' | '';
 export type Status = 'Confirmado' | 'TBH' | 'TBA';
 export type Done = 'pendente' | 'mintado' | 'pulado';
 export type Tab = 'dash' | 'hoje' | 'lista' | 'cal' | 'notif';
@@ -40,13 +43,13 @@ export interface Filters {
   q: string;
   wallet: 'Todas' | Wallet;
   type: 'Todos' | 'FCFS' | 'GTD' | 'GTD + FCFS';
-  chain: 'Todas' | 'RH' | 'ARC';
+  chain: 'Todas' | Exclude<Chain, ''>;
   done: 'Pendentes' | 'Mintados' | 'Pulados' | 'Tudo';
 }
 
 export const WALLETS: Wallet[] = ['Blowfly', 'MEGA', 'Loculus'];
 export const TYPES: Exclude<WLType, ''>[] = ['FCFS', 'GTD', 'GTD + FCFS'];
-export const CHAINS: Exclude<Chain, ''>[] = ['RH', 'ARC'];
+export const CHAINS: Exclude<Chain, ''>[] = ['RH', 'ARC', 'ZEC', 'BNB', 'SOLANA', 'BASE'];
 export const STATUSES: Status[] = ['Confirmado', 'TBH', 'TBA'];
 
 /**

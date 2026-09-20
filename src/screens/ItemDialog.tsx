@@ -120,15 +120,18 @@ export function ItemDialog({ item, isEdit, currency, onSave, onDelete, onClose }
             )}
           </Field>
         </div>
-        <div style={{ minWidth: 0 }}>
-          <Field label="Chain">
-            {(id) => (
-              <Seg name={id} value={form.chain} options={CHAINS} stretch paddingInline={8}
-                onChange={(v) => setField('chain', v)}
-              />
-            )}
-          </Field>
-        </div>
+      </div>
+
+      {/* Chain tem linha propria: sao seis redes e mais vao entrar, e numa
+          coluna estreita os botoes nao caberiam. */}
+      <div style={{ minWidth: 0 }}>
+        <Field label="Chain">
+          {(id) => (
+            <Seg name={id} value={form.chain} options={CHAINS} stretch paddingInline={6}
+              onChange={(v) => setField('chain', v)}
+            />
+          )}
+        </Field>
       </div>
 
       {/* Status ganhou mais espaco: os rotulos por extenso ("Sem horário")
