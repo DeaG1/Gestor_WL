@@ -93,16 +93,42 @@ export function ItemDialog({ item, isEdit, currency, onSave, onDelete, onClose }
         )}
       </Field>
 
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(160px, 1fr))', gap: 'var(--space-4)' }}>
-        <Field label="Wallet">
-          {(id) => <Seg name={id} value={form.wallet} options={WALLETS} onChange={(v) => setField('wallet', v)} />}
-        </Field>
-        <Field label="Tipo">
-          {(id) => <Seg name={id} value={form.type} options={TYPES} onChange={(v) => setField('type', v)} />}
-        </Field>
-        <Field label="Chain">
-          {(id) => <Seg name={id} value={form.chain} options={CHAINS} onChange={(v) => setField('chain', v)} />}
-        </Field>
+      {/* minWidth 0 nas colunas: sem isso o grid recusa encolher abaixo do
+          conteúdo e o segmentado transborda por cima da coluna vizinha. */}
+      <div style={{
+        display: 'grid',
+        gridTemplateColumns: 'repeat(auto-fit, minmax(160px, 1fr))',
+        gap: 'var(--space-4)',
+        alignItems: 'start',
+      }}
+      >
+        <div style={{ minWidth: 0 }}>
+          <Field label="Wallet">
+            {(id) => (
+              <Seg name={id} value={form.wallet} options={WALLETS} stretch paddingInline={8}
+                onChange={(v) => setField('wallet', v)}
+              />
+            )}
+          </Field>
+        </div>
+        <div style={{ minWidth: 0 }}>
+          <Field label="Tipo">
+            {(id) => (
+              <Seg name={id} value={form.type} options={TYPES} stretch paddingInline={6}
+                onChange={(v) => setField('type', v)}
+              />
+            )}
+          </Field>
+        </div>
+        <div style={{ minWidth: 0 }}>
+          <Field label="Chain">
+            {(id) => (
+              <Seg name={id} value={form.chain} options={CHAINS} stretch paddingInline={8}
+                onChange={(v) => setField('chain', v)}
+              />
+            )}
+          </Field>
+        </div>
       </div>
 
       <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1.4fr', gap: 'var(--space-4)' }}>
@@ -116,9 +142,15 @@ export function ItemDialog({ item, isEdit, currency, onSave, onDelete, onClose }
             <input id={id} className="input" type="time" value={form.time} onChange={onText('time')} />
           )}
         </Field>
-        <Field label="Status">
-          {(id) => <Seg name={id} value={form.status} options={STATUSES} onChange={(v) => setField('status', v)} />}
-        </Field>
+        <div style={{ minWidth: 0 }}>
+          <Field label="Status">
+            {(id) => (
+              <Seg name={id} value={form.status} options={STATUSES} stretch paddingInline={8}
+                onChange={(v) => setField('status', v)}
+              />
+            )}
+          </Field>
+        </div>
       </div>
 
       <Field label="Link do mint">
