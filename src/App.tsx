@@ -66,7 +66,12 @@ function Shell() {
 
   const nowLabel = `${nowHHMM(now)} BRT · ${short(today)}`;
 
-  const onNew = () => setForm({ item: { ...EMPTY_ITEM, date: today }, isEdit: false });
+  // WL nova nasce SEM data, de proposito. O handoff pedia `data = hoje`, mas
+  // isso assume que a data do mint ja e conhecida no cadastro — e aqui e o
+  // contrario: a WL e cadastrada quando e ganha, e a data sai depois. Com o
+  // padrao antigo toda WL nova entrava como se mintasse hoje, poluindo a tela
+  // Hoje, a agenda e o calendario, e obrigando a editar duas vezes.
+  const onNew = () => setForm({ item: { ...EMPTY_ITEM }, isEdit: false });
 
   return (
     <div className="wl-shell">
