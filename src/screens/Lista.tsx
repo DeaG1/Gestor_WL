@@ -10,7 +10,7 @@ import { Seg } from '../ui/Seg.tsx';
 import { Tag } from '../ui/Tag.tsx';
 
 const WALLET_OPTIONS: Filters['wallet'][] = ['Todas', ...WALLETS];
-const TYPE_OPTIONS: Filters['type'][] = ['Todos', 'FCFS', 'GTD', 'GTD + FCFS'];
+const TYPE_OPTIONS: Filters['type'][] = ['Todos', 'FCFS', 'GTD', 'Sem tipo'];
 const CHAIN_OPTIONS: Filters['chain'][] = ['Todas', ...CHAINS];
 const DONE_OPTIONS: Filters['done'][] = ['Pendentes', 'Mintados', 'Pulados', 'Tudo'];
 

@@ -4,7 +4,7 @@ import { Dialog } from '../ui/Dialog.tsx';
 import { Field } from '../ui/Field.tsx';
 import { Seg } from '../ui/Seg.tsx';
 import type { SegOption } from '../ui/Seg.tsx';
-import { CHAINS, EMPTY_ITEM, STATUSES, STATUS_LABELS, TYPES, WALLETS } from '../lib/types.ts';
+import { CHAINS, EMPTY_ITEM, STATUSES, STATUS_LABELS, TYPE_CHOICES, WALLETS } from '../lib/types.ts';
 import type { Done, WLItem } from '../lib/types.ts';
 import { money, num } from '@shared/money.ts';
 import { NEG, POS } from '../lib/tokens.ts';
@@ -114,7 +114,7 @@ export function ItemDialog({ item, isEdit, currency, onSave, onDelete, onClose }
         <div style={{ minWidth: 0 }}>
           <Field label="Tipo">
             {(id) => (
-              <Seg name={id} value={form.type} options={TYPES} stretch paddingInline={6}
+              <Seg name={id} value={form.type} options={TYPE_CHOICES} stretch paddingInline={6}
                 onChange={(v) => setField('type', v)}
               />
             )}

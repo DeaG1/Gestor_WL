@@ -42,13 +42,25 @@ export interface Settings {
 export interface Filters {
   q: string;
   wallet: 'Todas' | Wallet;
-  type: 'Todos' | 'FCFS' | 'GTD' | 'GTD + FCFS';
+  type: 'Todos' | 'FCFS' | 'GTD' | 'GTD + FCFS' | 'Sem tipo';
   chain: 'Todas' | Exclude<Chain, ''>;
   done: 'Pendentes' | 'Mintados' | 'Pulados' | 'Tudo';
 }
 
 export const WALLETS: Wallet[] = ['Blowfly', 'MEGA', 'Loculus'];
-export const TYPES: Exclude<WLType, ''>[] = ['FCFS', 'GTD', 'GTD + FCFS'];
+/**
+ * O que dá para escolher no modal. "Sem tipo" é o tipo vazio, e existia nos
+ * dados antigos sem ter como ser escolhido.
+ *
+ * 'GTD + FCFS' saiu das opções a pedido do dono, mas continua válido no banco
+ * e no tipo WLType: WL antigas marcadas assim seguem legíveis, e o filtro por
+ * "GTD" continua trazendo elas.
+ */
+export const TYPE_CHOICES: { label: string; value: WLType }[] = [
+  { label: 'FCFS', value: 'FCFS' },
+  { label: 'GTD', value: 'GTD' },
+  { label: 'Sem tipo', value: '' },
+];
 export const CHAINS: Exclude<Chain, ''>[] = ['RH', 'ARC', 'ZEC', 'BNB', 'SOLANA', 'BASE'];
 export const STATUSES: Status[] = ['Confirmado', 'TBH', 'TBA'];
 

@@ -27,6 +27,15 @@ describe('filterItems — busca e filtros', () => {
     expect(filterItems(items, f({ wallet: 'MEGA' })).map((i) => i.name)).toEqual(['Akai', 'Misfits']);
   });
 
+  it('filtra por "Sem tipo" sem cair na armadilha do "contém"', () => {
+    // "Sem tipo" precisa de um ramo próprio: nenhum tipo contém esse texto, e
+    // comparar com a string vazia seria pior ainda — todo texto a contém, e o
+    // filtro devolveria a lista inteira.
+    const semTipo = filterItems(items, f({ type: 'Sem tipo' }));
+    expect(semTipo.map((i) => i.name)).toEqual(['Rojak']);
+    expect(semTipo.length).toBeLessThan(items.length);
+  });
+
   it('filtra por chain', () => {
     expect(filterItems(items, f({ chain: 'ARC' })).map((i) => i.name)).toEqual(['Arcana']);
   });
